@@ -26,7 +26,6 @@ const icons: Record<string, string> = {
 const facts = [
   { label: 'From', value: 'Figueira da Foz, Portugal' },
   { label: 'Before code', value: 'National team rower · Air Force' },
-  { label: 'Nickname', value: '"Batoteiro"' },
   { label: 'Off the clock', value: 'Formula 1, FPS games on PC, the water' },
   { label: 'Speaks', value: languages.map((l) => l.name).join(', ') },
 ];
@@ -67,18 +66,18 @@ const facts = [
               I was born in 1996 in <strong>Figueira da Foz</strong>, a coastal town known for its beaches, so it's no
               surprise I was drawn to the water from a young age. I started rowing at <strong>Naval 1º de Maio</strong>,
               the local club, and took it seriously. At 1.86 m, my height helped, and with the results that followed I
-              was invited to join the <strong>Portuguese national team</strong>.
+              was invited to join the <strong>Portuguese junior national team</strong>.
             </p>
             <p>
-              Representing Portugal, I competed in two consecutive European Championships, finishing <strong>5th</strong> and then <strong>4th</strong>.
+              At 16 and 17, I represented Portugal at two consecutive Junior European Championships, finishing <strong>5th</strong> and then <strong>4th</strong>.
               Rowing taught me discipline, consistency and what it means to be part of a crew where everyone has to pull
               in the same rhythm.
             </p>
           </div>
           <StatRow
             stats={[
-              { value: 1.86, decimals: 2, suffix: ' m', label: 'tall, an advantage in the boat' },
-              { value: 2, label: 'European Championships for Portugal' },
+              { text: 'Junior', label: 'national team rower for Portugal' },
+              { value: 2, label: 'Junior European Championships' },
               { value: 4, suffix: 'th', label: 'best finish in Europe' },
             ]}
           />
@@ -91,12 +90,14 @@ const facts = [
           <div class="prose reveal">
             <p>
               My father served as a military paratrooper, and growing up around his stories gave me a real interest in
-              aviation and military life. After high school I enlisted in the <strong>Portuguese Air Force</strong> with
-              one goal: to become a pilot. I was accepted and on track.
+              aviation and military life. In the summer after high school, I enlisted in the <strong>Portuguese Air Force</strong> with
+              one goal: to become a pilot. I was accepted and on track, while keeping a university place as a
+              backup plan.
             </p>
             <p>
-              Then an injury revealed that my back would not allow me to pursue a career as a pilot. It was a hard
-              moment, but it pushed me to look at something I had always treated as just a hobby.
+              Within the first couple of months, an injury revealed that my back would not allow me to pursue a career
+              as a pilot. It was a hard moment, but that backup plan let me start my Computer Science degree on time, and
+              it pushed me towards something I had always treated as just a hobby.
             </p>
           </div>
           <FlightScene />
@@ -120,7 +121,7 @@ const facts = [
           </div>
 
           <aside class="callout reveal">
-            <p class="eyebrow">A confession</p>
+            <p class="eyebrow">Curiosity in action</p>
             <p>
               During my Computer Science degree, my flatmates and I got hooked on <em>EverWing</em>, an arcade shooter
               you could play inside Facebook Messenger, flying through waves of monsters and collecting coins. Naturally,
@@ -128,9 +129,8 @@ const facts = [
               found which functions I could call from the console to top up my balance.
             </p>
             <p>
-              It was harmless and spoiled nothing for anyone, but to this day my friends call me <strong>"Batoteiro"</strong>, Portuguese for <em>cheater</em>.
-              The irony: as a lifelong PC gamer and FPS fan, real cheaters are the thing I can't stand. For me it was
-              never about winning; it was about understanding how it worked.
+              It was harmless and spoiled nothing for anyone. It was never about the coins; it was about understanding
+              how it worked. Looking back, it was my first real front-end debugging session.
             </p>
           </aside>
 

@@ -10,6 +10,7 @@ const experience = await getExperience();
 // Skills used in at least one job become filters (with years of use); the rest are listed in the sidebar.
 const allSkills = skills.flatMap((g) => g.items.map((s) => ({ ...s, group: g.group, match: s.match ?? [s.name] })));
 const jobSkills = allSkills
+  .filter((s) => s.filter !== false)
   .map((s) => ({ ...s, months: skillMonths(experience, s.match) }))
   .filter((s) => s.months > 0)
   .sort((a, b) => b.months - a.months);

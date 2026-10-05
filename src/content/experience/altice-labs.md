@@ -4,7 +4,7 @@ role: Frontend Developer
 location: Aveiro, Portugal
 start: 2019-07-01
 end: 2021-06-01
-technologies: [Angular, TypeScript, JavaScript, HTML, CSS, REST APIs]
+technologies: [Angular, TypeScript, JavaScript, HTML, CSS, REST APIs, Git]
 ---
 
 - Took part in building a CRM platform from project inception using Angular and TypeScript.

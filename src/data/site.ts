@@ -30,6 +30,8 @@ export type Skill = {
   // Technology names as written in the experience files; defaults to [name].
   // Used to compute years of use and to filter jobs by skill.
   match?: string[];
+  // false keeps a skill out of the "Filter by skill" chips (no years badge), e.g. occasional use.
+  filter?: boolean;
 };
 
 export const skills: { group: string; items: Skill[] }[] = [
@@ -45,7 +47,7 @@ export const skills: { group: string; items: Skill[] }[] = [
     ],
   },
   { group: 'CMS & Platforms', items: [{ name: 'AEM', match: ['AEM'] }] },
-  { group: 'Backend', items: [{ name: 'Java' }, { name: 'Node.js' }, { name: 'REST APIs' }] },
+  { group: 'Backend', items: [{ name: 'Java', filter: false }, { name: 'Node.js' }, { name: 'REST APIs' }] },
   { group: 'Databases', items: [{ name: 'PostgreSQL' }, { name: 'MySQL' }, { name: 'MongoDB' }] },
   { group: 'Tools', items: [{ name: 'Git' }, { name: 'Postman' }, { name: 'Jenkins' }, { name: 'Jira' }] },
 ];

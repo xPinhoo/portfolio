@@ -4,7 +4,7 @@ role: Frontend Developer
 location: Lisbon, Portugal
 start: 2021-06-01
 end: 2025-02-01
-technologies: [Vue.js, AEM, Java, JavaScript, HTML, CSS, Git]
+technologies: [Vue.js, AEM, JavaScript, HTML, CSS, REST APIs, Git, Java]
 ---
 
 - Developed and maintained Vodafone's eShop platform using Vue.js and Adobe Experience Manager (AEM).

@@ -2,7 +2,7 @@
 title: Psychology clinic website
 summary: Came in to rescue a clinic's WordPress website, making online appointment booking and the clinic's team and vision pages work the way they needed.
 status: completed
-period: Freelance
+period: '2025'
 role: Problem-solver on an existing WordPress project
 tech: [WordPress]
 visual: calendar

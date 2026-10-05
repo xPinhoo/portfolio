@@ -35,7 +35,7 @@ const commands: Record<string, (arg: string) => Line[] | void> = {
       return [{ kind: 'error', text: `Uncaught TypeError: addCoins expects a positive integer` }];
     }
     if (n > MAX_ADD) {
-      return [{ kind: 'error', text: 'Uncaught RangeError: even a Batoteiro has limits (max 1,000,000)' }];
+      return [{ kind: 'error', text: 'Uncaught RangeError: even curiosity has limits (max 1,000,000)' }];
     }
     coins.value += n;
     tweenCoins();
@@ -44,12 +44,12 @@ const commands: Record<string, (arg: string) => Line[] | void> = {
       unlocked.value = true;
       toast.value = true;
       setTimeout(() => (toast.value = false), 5000);
-      out.push({ kind: 'info', text: '🏆 Achievement unlocked: "Batoteiro"' });
+      out.push({ kind: 'info', text: '🏆 Achievement unlocked: "Curious mind"' });
     }
     return out;
   },
   getCoins: () => [{ kind: 'output', text: coins.value.toLocaleString('en') }],
-  whoami: () => [{ kind: 'output', text: '"Francisco Oliveira, a.k.a. Batoteiro. Front-end developer."' }],
+  whoami: () => [{ kind: 'output', text: '"Francisco Oliveira. Front-end developer, curious about how things work."' }],
   clear: () => {
     lines.value = [];
   },
@@ -139,7 +139,7 @@ function tweenCoins() {
       <div v-if="toast" class="achievement" role="status">
         <span aria-hidden="true">🏆</span>
         <div>
-          <strong>Achievement unlocked: Batoteiro</strong>
+          <strong>Achievement unlocked: Curious mind</strong>
           <small>No real games were harmed in the making of this console.</small>
         </div>
       </div>
