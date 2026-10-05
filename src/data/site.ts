@@ -22,7 +22,7 @@ export const profile = {
 
 export const links = {
   linkedin: 'https://www.linkedin.com/in/francisco-pinho',
-  github: '', // TODO: add GitHub profile URL
+  github: 'https://github.com/xPinhoo',
 };
 
 export type Skill = {

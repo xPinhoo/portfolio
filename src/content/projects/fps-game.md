@@ -1,6 +1,6 @@
 ---
 title: My own FPS game
-summary: A lifelong FPS player learning how the games he loves are made, by building a first-person shooter in Unreal Engine.
+summary: I've played first-person shooters all my life. Now I'm learning how they're made by building my own in Unreal Engine.
 status: ongoing
 period: Since 2026
 role: Personal project · learning game development
