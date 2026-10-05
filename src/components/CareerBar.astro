@@ -1,0 +1,176 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDuration, monthsBetween } from '../lib/content';
+
+interface Props {
+  jobs: CollectionEntry<'experience'>[];
+}
+
+// Oldest first, left to right.
+const jobs = [...Astro.props.jobs].sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
+const first = jobs[0].data.start;
+const total = monthsBetween(first);
+const now = new Date();
+
+const segments = jobs.map((job, i) => {
+  const months = monthsBetween(job.data.start, job.data.end);
+  return {
+    id: job.id,
+    company: job.data.company,
+    role: job.data.role,
+    months,
+    duration: formatDuration(months),
+    current: !job.data.end,
+    tech: job.data.technologies.join('|'),
+    // Later roles get a stronger tint.
+    tint: Math.round(30 + (70 * i) / Math.max(1, jobs.length - 1)),
+  };
+});
+
+const ticks = [];
+for (let y = first.getUTCFullYear() + 1; y <= now.getUTCFullYear(); y++) {
+  const offset = (y - first.getUTCFullYear()) * 12 - first.getUTCMonth();
+  ticks.push({ year: y, pct: (offset / total) * 100 });
+}
+---
+
+<div class="career reveal">
+  <div class="bar">
+    {
+      segments.map((s, i) => (
+        <a
+          href={`#job-${s.id}`}
+          class:list={['seg', { current: s.current, strong: s.tint > 70 }]}
+          style={`flex-grow: ${s.months}; --tint: ${s.tint}%; --i: ${i}`}
+          data-seg
+          data-tech={s.tech}
+          title={`${s.role} · ${s.company} · ${s.duration}`}
+        >
+          <span class="name">{s.company}</span>
+          <span class="dur">{s.duration}</span>
+        </a>
+      ))
+    }
+  </div>
+  <div class="ticks" aria-hidden="true">
+    {ticks.map((t) => <span style={`left: ${t.pct}%`}>{t.year}</span>)}
+  </div>
+</div>
+
+<style>
+  .career {
+    margin-bottom: 2.5rem;
+  }
+  .bar {
+    display: flex;
+    gap: 4px;
+    height: 64px;
+  }
+  .seg {
+    position: relative;
+    flex-basis: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 0 0.75rem;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--accent) var(--tint), var(--surface));
+    color: var(--text);
+    text-decoration: none;
+    overflow: hidden;
+    transform-origin: left;
+    transition:
+      opacity 0.3s,
+      transform 0.25s,
+      filter 0.25s;
+  }
+  .seg.strong {
+    color: var(--bg);
+  }
+  .seg:hover {
+    transform: translateY(-3px);
+    filter: brightness(1.05);
+  }
+  .seg.dimmed {
+    opacity: 0.25;
+  }
+  .seg.current::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 24px;
+    background: linear-gradient(to right, transparent, rgb(255 255 255 / 0.35));
+    animation: glow 2s ease-in-out infinite;
+  }
+  @keyframes glow {
+    50% {
+      opacity: 0.2;
+    }
+  }
+  .name,
+  .dur {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+  .dur {
+    font-size: 0.75rem;
+    opacity: 0.8;
+  }
+  .ticks {
+    position: relative;
+    height: 1.5rem;
+    margin-top: 0.4rem;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+  }
+  .ticks span {
+    position: absolute;
+    transform: translateX(-50%);
+  }
+  .ticks span::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -0.45rem;
+    height: 0.3rem;
+    border-left: 1px solid var(--border);
+  }
+
+  /* Grow in from the left when revealed */
+  :global(.js-anim) .career .seg {
+    transform: scaleX(0);
+  }
+  :global(.js-anim) .career.is-visible .seg {
+    transform: none;
+    transition:
+      transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1) calc(var(--i) * 0.15s),
+      opacity 0.3s;
+  }
+  :global(.js-anim) .career.is-visible .seg:hover {
+    transform: translateY(-3px);
+  }
+
+  @media (max-width: 560px) {
+    .bar {
+      height: 56px;
+    }
+    .seg {
+      padding: 0 0.5rem;
+    }
+    .name {
+      font-size: 0.8rem;
+    }
+    .ticks span:nth-child(even) {
+      display: none;
+    }
+  }
+</style>

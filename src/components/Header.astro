@@ -1,0 +1,84 @@
+---
+import ThemeToggle from './ThemeToggle.vue';
+import { profile } from '../data/site';
+
+const nav = [
+  { href: '/about', label: 'About' },
+  { href: '/experience', label: 'Experience' },
+  { href: '/projects', label: 'Projects' },
+  { href: '/contact', label: 'Contact' },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, '');
+const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header>
+  <div class="container bar">
+    <a href="/" class="brand">{profile.shortName}</a>
+    <nav aria-label="Main">
+      {
+        nav.map((item) => (
+          <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+            {item.label}
+          </a>
+        ))
+      }
+      <ThemeToggle client:load />
+    </nav>
+  </div>
+</header>
+
+<style lang="scss">
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: color-mix(in srgb, var(--bg) 85%, transparent);
+    backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--border);
+  }
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 60px;
+    flex-wrap: wrap;
+  }
+  .brand {
+    font-weight: 700;
+    color: var(--text);
+    text-decoration: none;
+    letter-spacing: -0.01em;
+  }
+  nav {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    flex-wrap: wrap;
+    a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.95rem;
+      padding: 0.25rem 0;
+      &:hover,
+      &[aria-current='page'] {
+        color: var(--text);
+      }
+      &[aria-current='page'] {
+        box-shadow: inset 0 -2px 0 var(--accent);
+      }
+    }
+  }
+  @media (max-width: 560px) {
+    .bar {
+      padding-top: 0.6rem;
+      padding-bottom: 0.6rem;
+    }
+    nav {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+</style>

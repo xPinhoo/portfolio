@@ -1,0 +1,148 @@
+---
+// Flight path that takes off, changes course at the injury and lands on a screen.
+// The page script adds .flying when visible and starts the plane's <animateMotion>.
+const route = 'M20 170 C 120 165, 170 40, 290 38 C 370 36, 405 52, 430 80 C 465 120, 520 146, 586 146';
+---
+
+<figure class="flight reveal" data-flight>
+  <svg viewBox="0 0 640 200" aria-hidden="true">
+    <defs>
+      <mask id="flight-mask" maskUnits="userSpaceOnUse">
+        <path class="draw" d={route} pathLength="1"></path>
+      </mask>
+    </defs>
+    <path id="flight-route" class="route" d={route} mask="url(#flight-mask)"></path>
+    <circle class="point" cx="20" cy="170" r="6"></circle>
+    <g class="bend" transform="translate(430 80)">
+      <circle r="11"></circle>
+      <path d="M-4 -4 L4 4 M4 -4 L-4 4"></path>
+    </g>
+    <g class="screen" transform="translate(588 124)">
+      <rect width="48" height="34" rx="4"></rect>
+      <path class="stand" d="M18 42 H30 M24 34 V42"></path>
+      <path class="code" d="M17 12 L11 17 L17 22 M31 12 L37 17 L31 22 M26 10 L22 24"></path>
+    </g>
+    <g class="plane">
+      <path d="M-12 -7 L14 0 L-12 7 L-6 0 Z"></path>
+      <animateMotion dur="3.2s" fill="freeze" begin="indefinite" rotate="auto">
+        <mpath href="#flight-route"></mpath>
+      </animateMotion>
+    </g>
+  </svg>
+  <figcaption>
+    <ol>
+      <li><span>Takeoff</span> Air Force</li>
+      <li><span>Course change</span> back injury</li>
+      <li><span>Landing</span> computers</li>
+    </ol>
+    <button type="button" class="replay" data-replay>↻ Replay flight</button>
+  </figcaption>
+</figure>
+
+<style>
+  .flight {
+    margin: 1.75rem 0 0.5rem;
+    padding: 1rem 1rem 0.75rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+  .draw {
+    fill: none;
+    stroke: #fff;
+    stroke-width: 10;
+    stroke-dasharray: 1;
+    stroke-dashoffset: 1;
+  }
+  .flying .draw {
+    stroke-dashoffset: 0;
+    transition: stroke-dashoffset 3.2s linear;
+  }
+  .route {
+    fill: none;
+    stroke: var(--accent);
+    stroke-width: 2.5;
+    stroke-dasharray: 6 8;
+    stroke-linecap: round;
+  }
+  .point {
+    fill: var(--accent);
+  }
+  .bend circle {
+    fill: var(--surface);
+    stroke: var(--muted);
+    stroke-width: 1.5;
+  }
+  .bend path {
+    stroke: var(--muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+  }
+  .screen rect,
+  .screen .stand,
+  .screen .code {
+    fill: none;
+    stroke: var(--muted);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transition: stroke 0.4s;
+  }
+  .landed .screen rect,
+  .landed .screen .stand,
+  .landed .screen .code {
+    stroke: var(--accent);
+  }
+  .landed .screen rect {
+    fill: var(--accent-soft);
+  }
+  .plane {
+    fill: var(--accent);
+    opacity: 0;
+  }
+  .flying .plane {
+    opacity: 1;
+  }
+  figcaption {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+  }
+  ol {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem 1.25rem;
+    color: var(--muted);
+  }
+  ol span {
+    color: var(--text);
+    font-weight: 600;
+    margin-right: 0.25rem;
+  }
+  .replay {
+    font: inherit;
+    font-size: 0.8rem;
+    color: var(--accent);
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.25rem 0.75rem;
+    cursor: pointer;
+  }
+  .replay:hover {
+    border-color: var(--accent);
+  }
+</style>

@@ -1,0 +1,155 @@
+---
+import { Image } from 'astro:assets';
+import profilePhoto from '../assets/profile.jpg';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ExperienceItem from '../components/ExperienceItem.astro';
+import { getExperience, getProjects } from '../lib/content';
+import { highlights, links, profile } from '../data/site';
+
+const experience = await getExperience();
+const projects = (await getProjects()).slice(0, 3);
+---
+
+<BaseLayout>
+  <section class="container hero">
+    <div class="intro">
+      <p class="eyebrow">{profile.role} · {profile.location}</p>
+      <h1>Hi, I'm {profile.shortName.split(' ')[0]}.</h1>
+      <p class="lead">{profile.headline}</p>
+      <div class="actions">
+        <a class="btn primary" href="/experience">View experience</a>
+        {profile.hasCv && <a class="btn" href="/cv.pdf" download>Download CV</a>}
+        <a class="btn" href={links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
+        <a class="btn" href={`mailto:${profile.email}`}>Email me</a>
+      </div>
+    </div>
+    <Image
+      class="avatar"
+      src={profilePhoto}
+      alt={`Portrait of ${profile.name}`}
+      width={480}
+      loading="eager"
+    />
+  </section>
+
+  <section class="container">
+    <ul class="highlights">
+      {
+        highlights.map((h) => (
+          <li class="card">
+            <strong>{h.value}</strong>
+            <span class="muted">{h.label}</span>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  <section class="container section">
+    <div class="head">
+      <h2>Recent experience</h2>
+      <a href="/experience">Full CV →</a>
+    </div>
+    <div>
+      {experience.map((job) => <ExperienceItem job={job} compact />)}
+    </div>
+  </section>
+
+  {
+    projects.length > 0 && (
+      <section class="container section">
+        <div class="head">
+          <h2>Side projects</h2>
+          <a href="/projects">All projects →</a>
+        </div>
+        <div class="grid">
+          {projects.map((p) => (
+            <ProjectCard project={p} />
+          ))}
+        </div>
+      </section>
+    )
+  }
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-top: 5rem;
+    padding-bottom: 2.5rem;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 2.5rem;
+  }
+  .avatar {
+    flex-shrink: 0;
+    width: 220px;
+    height: 220px;
+    border-radius: 50%;
+    object-fit: cover;
+    object-position: center 35%;
+    border: 4px solid var(--surface);
+    box-shadow: 0 0 0 1px var(--border), 0 12px 32px -12px rgb(0 0 0 / 0.35);
+  }
+  .lead {
+    font-size: 1.2rem;
+    color: var(--muted);
+    max-width: 640px;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.75rem;
+  }
+  .highlights {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+  }
+  .highlights li {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  .highlights strong {
+    font-size: 1.75rem;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .highlights span {
+    font-size: 0.9rem;
+  }
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+  }
+  @media (max-width: 720px) {
+    .hero {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+    .avatar {
+      order: -1;
+      width: 120px;
+      height: 120px;
+    }
+  }
+  @media (max-width: 560px) {
+    .hero {
+      padding-top: 2.5rem;
+    }
+  }
+</style>

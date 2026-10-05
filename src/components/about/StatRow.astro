@@ -1,0 +1,63 @@
+---
+interface Stat {
+  label: string;
+  value?: number; // animated count-up target
+  decimals?: number;
+  prefix?: string;
+  suffix?: string;
+  text?: string; // static value instead of a number
+}
+
+interface Props {
+  stats: Stat[];
+}
+
+const { stats } = Astro.props;
+---
+
+<ul class="stats reveal">
+  {
+    stats.map((s) => (
+      <li>
+        <strong>{s.prefix}{s.text ?? <span data-count={s.value} data-decimals={s.decimals ?? 0}>{s.value?.toFixed(s.decimals ?? 0)}</span>}{s.suffix}</strong>
+        <span class="label">{s.label}</span>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .stats {
+    list-style: none;
+    padding: 0;
+    margin: 1.75rem 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+    gap: 0.75rem;
+  }
+  li {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    transition: transform 0.2s, border-color 0.2s;
+  }
+  li:hover {
+    transform: translateY(-3px);
+    border-color: var(--accent);
+  }
+  strong {
+    font-size: 1.75rem;
+    line-height: 1.1;
+    color: var(--accent);
+    font-variant-numeric: tabular-nums;
+  }
+  .label {
+    font-size: 0.85rem;
+    color: var(--muted);
+    line-height: 1.35;
+  }
+</style>

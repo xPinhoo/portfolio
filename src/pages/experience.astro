@@ -1,0 +1,315 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ExperienceItem from '../components/ExperienceItem.astro';
+import CareerBar from '../components/CareerBar.astro';
+import { formatYears, getExperience, skillMonths } from '../lib/content';
+import { certifications, education, languages, profile, skills, yearsOfExperience } from '../data/site';
+
+const experience = await getExperience();
+
+// Skills used in at least one job become filters (with years of use); the rest are listed in the sidebar.
+const allSkills = skills.flatMap((g) => g.items.map((s) => ({ ...s, group: g.group, match: s.match ?? [s.name] })));
+const jobSkills = allSkills
+  .map((s) => ({ ...s, months: skillMonths(experience, s.match) }))
+  .filter((s) => s.months > 0)
+  .sort((a, b) => b.months - a.months);
+const otherSkills = skills
+  .map((g) => ({ group: g.group, items: g.items.filter((s) => !jobSkills.some((j) => j.name === s.name)) }))
+  .filter((g) => g.items.length > 0);
+---
+
+<BaseLayout title="Experience" description={`Work experience, skills and education of ${profile.name}`}>
+  <section class="container section">
+    <div class="top">
+      <div>
+        <p class="eyebrow">Curriculum</p>
+        <h1>Experience</h1>
+        <p class="muted sub">
+          {yearsOfExperience}+ years across {experience.length} companies, building enterprise front-ends.
+        </p>
+      </div>
+      {profile.hasCv && <a class="btn primary" href="/cv.pdf" download>Download CV (PDF)</a>}
+    </div>
+
+    <CareerBar jobs={experience} />
+
+    <div class="filter reveal" role="group" aria-labelledby="filter-label">
+      <p id="filter-label" class="filter-label">Filter by skill</p>
+      <div class="chips">
+        {
+          jobSkills.map((s) => (
+            <button type="button" class="chip" data-skill={s.match.join('|')} data-name={s.name} aria-pressed="false">
+              {s.name}
+              <span class="yrs">{formatYears(s.months)}</span>
+            </button>
+          ))
+        }
+      </div>
+      <p class="status" aria-live="polite"></p>
+    </div>
+
+    <div class="layout">
+      <div class="timeline">
+        <div class="rail" aria-hidden="true"><span></span></div>
+        {experience.map((job) => <ExperienceItem job={job} />)}
+      </div>
+
+      <aside>
+        <div class="card reveal">
+          <h2>Certifications</h2>
+          {
+            certifications.map((c) => (
+              <p>
+                <strong>{c.name}</strong>
+                <br />
+                <span class="muted">
+                  {c.issuer} · {c.date}
+                </span>
+              </p>
+            ))
+          }
+        </div>
+
+        <div class="card reveal">
+          <h2>Education</h2>
+          {
+            education.map((e) => (
+              <p>
+                <strong>{e.degree}</strong>
+                <br />
+                <span class="muted">
+                  {e.school} · {e.period}
+                </span>
+              </p>
+            ))
+          }
+        </div>
+
+        <div class="card reveal">
+          <h2>Also worked with</h2>
+          {
+            otherSkills.map((g) => (
+              <div class="group">
+                <h3>{g.group}</h3>
+                <ul class="tags">
+                  {g.items.map((i) => (
+                    <li class="tag">{i.name}</li>
+                  ))}
+                </ul>
+              </div>
+            ))
+          }
+        </div>
+
+        <div class="card reveal">
+          <h2>Languages</h2>
+          {
+            languages.map((l) => (
+              <p class="lang">
+                <strong>{l.name}</strong>
+                <span class="muted">{l.level}</span>
+              </p>
+            ))
+          }
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { onScrollFrame, railProgress } from '../scripts/motion';
+
+  // --- Timeline rail fills as you scroll ---------------------------------------
+  const timeline = document.querySelector<HTMLElement>('.timeline');
+  if (timeline) onScrollFrame(() => timeline.style.setProperty('--rail', String(railProgress(timeline))));
+
+  // --- Skill filter ------------------------------------------------------------
+  const chips = [...document.querySelectorAll<HTMLButtonElement>('.chip')];
+  const jobs = [...document.querySelectorAll<HTMLElement>('[data-job]')];
+  const segments = [...document.querySelectorAll<HTMLElement>('[data-seg]')];
+  const status = document.querySelector<HTMLElement>('.filter .status');
+
+  const techOf = (el: HTMLElement) => (el.dataset.tech ?? '').split('|');
+
+  function select(chip: HTMLButtonElement | null) {
+    const keys = chip?.dataset.skill?.split('|') ?? null;
+    chips.forEach((c) => c.setAttribute('aria-pressed', String(c === chip)));
+
+    let hits = 0;
+    for (const job of jobs) {
+      const hit = !keys || techOf(job).some((t) => keys.includes(t));
+      if (keys && hit) hits++;
+      job.classList.toggle('dimmed', !hit);
+      job.querySelectorAll<HTMLElement>('.tag[data-tech]').forEach((tag) => {
+        tag.classList.toggle('match', !!keys && keys.includes(tag.dataset.tech!));
+      });
+    }
+    for (const seg of segments) {
+      seg.classList.toggle('dimmed', !!keys && !techOf(seg).some((t) => keys.includes(t)));
+    }
+
+    if (!status) return;
+    status.textContent = '';
+    if (!chip) return;
+    status.append(`${chip.dataset.name}: used in ${hits} of ${jobs.length} roles · `);
+    const clear = document.createElement('button');
+    clear.type = 'button';
+    clear.textContent = 'Clear filter';
+    clear.addEventListener('click', () => select(null));
+    status.append(clear);
+  }
+
+  chips.forEach((chip) =>
+    chip.addEventListener('click', () => select(chip.getAttribute('aria-pressed') === 'true' ? null : chip)),
+  );
+</script>
+
+<style>
+  .top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+  }
+  .sub {
+    margin: 0;
+  }
+
+  /* Skill filter */
+  .filter {
+    margin-bottom: 2.5rem;
+  }
+  .filter-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 0.6rem;
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    font: inherit;
+    font-size: 0.88rem;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.35rem 0.4rem 0.35rem 0.85rem;
+    cursor: pointer;
+    transition:
+      border-color 0.2s,
+      background 0.2s,
+      color 0.2s,
+      transform 0.15s;
+  }
+  .chip:hover {
+    border-color: var(--accent);
+  }
+  .chip:active {
+    transform: scale(0.97);
+  }
+  .yrs {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 0.1rem 0.45rem;
+  }
+  .chip[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--bg);
+  }
+  .chip[aria-pressed='true'] .yrs {
+    background: color-mix(in srgb, var(--bg) 25%, transparent);
+    color: var(--bg);
+  }
+  .status {
+    min-height: 1.6em;
+    margin: 0.75rem 0 0;
+    font-size: 0.9rem;
+    color: var(--muted);
+  }
+  .status :global(button) {
+    font: inherit;
+    color: var(--accent);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  /* Timeline */
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 300px;
+    gap: 3rem;
+    align-items: start;
+  }
+  .timeline {
+    position: relative;
+  }
+  .rail {
+    position: absolute;
+    left: 0;
+    top: 0.35rem;
+    bottom: 0;
+    width: 2px;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .rail span {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    transform-origin: top;
+    transform: scaleY(var(--rail, 0));
+  }
+
+  /* Sidebar */
+  aside {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+  aside h2 {
+    font-size: 1.1rem;
+  }
+  .group {
+    margin-bottom: 1rem;
+  }
+  .group:last-child {
+    margin-bottom: 0;
+  }
+  .group h3 {
+    font-size: 0.85rem;
+    color: var(--muted);
+    font-weight: 500;
+    margin-bottom: 0.4rem;
+  }
+  aside p:last-child {
+    margin-bottom: 0;
+  }
+  .lang {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 0.4rem;
+  }
+  @media (max-width: 820px) {
+    .layout {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

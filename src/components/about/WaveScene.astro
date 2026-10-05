@@ -1,0 +1,101 @@
+---
+// A rowing shell gliding over looping waves. Purely decorative.
+function wave(amp: number, y: number) {
+  let d = `M0 ${y}`;
+  for (let x = 0; x < 1200; x += 150) d += ` Q${x + 37.5} ${y - amp} ${x + 75} ${y} T${x + 150} ${y}`;
+  return `${d} L1200 140 L0 140 Z`;
+}
+---
+
+<div class="scene reveal" aria-hidden="true">
+  <svg viewBox="0 0 600 140" preserveAspectRatio="xMidYMid slice">
+    <circle class="sun" cx="500" cy="38" r="18"></circle>
+    <path class="wave back" d={wave(10, 80)}></path>
+    <g transform="translate(235 72)">
+      <g class="boat">
+        <line class="oar" x1="64" y1="-6" x2="26" y2="18"></line>
+        <circle class="rower" cx="66" cy="-19" r="5"></circle>
+        <path class="rower-body" d="M66 -14 L62 -1"></path>
+        <path class="hull" d="M0 0 H132 Q126 7 110 8 H16 Q5 7 0 0 Z"></path>
+      </g>
+    </g>
+    <path class="wave front" d={wave(7, 90)}></path>
+  </svg>
+</div>
+
+<style>
+  .scene {
+    margin: 1.5rem 0 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    background: linear-gradient(to bottom, var(--surface), var(--accent-soft));
+  }
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+    min-height: 110px;
+  }
+  .sun {
+    fill: var(--accent);
+    opacity: 0.18;
+  }
+  .wave {
+    fill: var(--accent);
+  }
+  .wave.back {
+    opacity: 0.25;
+    animation: drift 7s linear infinite;
+  }
+  .wave.front {
+    opacity: 0.55;
+    animation: drift 4s linear infinite;
+  }
+  .hull {
+    fill: var(--text);
+  }
+  .rower {
+    fill: var(--text);
+  }
+  .rower-body,
+  .oar {
+    stroke: var(--text);
+    stroke-width: 3;
+    stroke-linecap: round;
+  }
+  .oar {
+    stroke-width: 2;
+    transform-box: fill-box;
+    transform-origin: 100% 0;
+    animation: row 1.6s ease-in-out infinite;
+  }
+  .boat {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: bob 3s ease-in-out infinite;
+  }
+  @keyframes drift {
+    to {
+      transform: translateX(-150px);
+    }
+  }
+  @keyframes row {
+    0%,
+    100% {
+      transform: rotate(-16deg);
+    }
+    50% {
+      transform: rotate(14deg);
+    }
+  }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateY(0) rotate(0);
+    }
+    50% {
+      transform: translateY(-2px) rotate(-1deg);
+    }
+  }
+</style>

@@ -1,0 +1,170 @@
+---
+import { Image } from 'astro:assets';
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import StatusBadge from '../../components/StatusBadge.astro';
+import ProjectVisual from '../../components/ProjectVisual.astro';
+import SleepDiaryDemo from '../../components/SleepDiaryDemo.vue';
+import { getProjects } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+  return projects.map((project) => ({ params: { id: project.id }, props: { project } }));
+}
+
+const { project } = Astro.props;
+const { title, summary, tech, repo, demo, cover, visual, status, period, role, interactive } = project.data;
+const { Content } = await render(project);
+---
+
+<BaseLayout title={title} description={summary}>
+  <article class="container section narrow">
+    <a href="/projects" class="back">← All projects</a>
+    <div class="meta">
+      <StatusBadge status={status} />
+      <span class="period">{period}</span>
+    </div>
+    <h1>{title}</h1>
+    <p class="lead muted">{summary}</p>
+
+    <dl class="facts">
+      {
+        role && (
+          <div>
+            <dt>Role</dt>
+            <dd>{role}</dd>
+          </div>
+        )
+      }
+      <div>
+        <dt>Built with</dt>
+        <dd>
+          <ul class="tags">
+            {tech.map((t) => (
+              <li class="tag">{t}</li>
+            ))}
+          </ul>
+        </dd>
+      </div>
+    </dl>
+
+    {
+      (repo || demo) && (
+        <div class="actions">
+          {interactive && (
+            <a class="btn primary" href="#try-it">
+              ▶ Try it here
+            </a>
+          )}
+          {demo && (
+            <a class:list={['btn', { primary: !interactive }]} href={demo} target="_blank" rel="noopener">
+              Visit the live site ↗
+            </a>
+          )}
+          {repo && (
+            <a class="btn" href={repo} target="_blank" rel="noopener">
+              Source code
+            </a>
+          )}
+        </div>
+      )
+    }
+    {cover && <Image class="cover reveal" src={cover} alt={`Screenshot of ${title}`} width={1200} />}
+    {
+      !cover && visual && (
+        <div class="cover banner reveal">
+          <ProjectVisual visual={visual} />
+        </div>
+      )
+    }
+    {
+      interactive === 'sleep-diary' && (
+        <section class="try reveal" id="try-it">
+          <p class="eyebrow">Interactive demo</p>
+          <h2>Try the sleep diary</h2>
+          <p class="muted">
+            The app's core feature, rebuilt here in Vue with the same questions, rules and calculations, translated
+            into English. Fill in last night and you'll get the same report the app gives.
+          </p>
+          <SleepDiaryDemo client:idle />
+        </section>
+      )
+    }
+    <div class="prose body reveal">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .narrow {
+    max-width: 760px;
+  }
+  .back {
+    display: inline-block;
+    margin-bottom: 1.5rem;
+    font-size: 0.9rem;
+  }
+  .meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 0.75rem;
+  }
+  .period {
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+  }
+  .lead {
+    font-size: 1.15rem;
+  }
+  .facts {
+    display: grid;
+    gap: 0.9rem;
+    margin: 1.5rem 0 0;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+  }
+  dt {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  dd {
+    margin: 0;
+    font-weight: 500;
+  }
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.6rem;
+    margin-top: 1.5rem;
+  }
+  .cover {
+    width: 100%;
+    height: auto;
+    margin-top: 2rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+  }
+  .banner {
+    aspect-ratio: 16 / 7;
+    overflow: hidden;
+  }
+  .try {
+    margin-top: 2.5rem;
+    scroll-margin-top: 80px;
+  }
+  .try h2 {
+    margin-bottom: 0.4rem;
+  }
+  .try > .muted {
+    margin-bottom: 1.25rem;
+  }
+  .body {
+    margin-top: 2rem;
+  }
+</style>

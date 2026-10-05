@@ -1,0 +1,118 @@
+---
+import { render, type CollectionEntry } from 'astro:content';
+import { formatDuration, formatPeriod, monthsBetween } from '../lib/content';
+
+interface Props {
+  job: CollectionEntry<'experience'>;
+  compact?: boolean;
+}
+
+const { job, compact = false } = Astro.props;
+const { company, tagline, role, location, start, end, technologies } = job.data;
+const current = !end;
+const { Content } = await render(job);
+---
+
+<article class="item reveal" id={`job-${job.id}`} data-job data-tech={technologies.join('|')}>
+  <div class:list={['dot', { current }]} aria-hidden="true"></div>
+  <p class="period">
+    <span>{formatPeriod(start, end)}</span><span class="sep" aria-hidden="true">·</span><span>{formatDuration(monthsBetween(start, end))}</span>
+    {current && <span class="badge">Current</span>}
+  </p>
+  <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}</h3>
+  <p class="muted loc">{location}</p>
+  {
+    !compact && (
+      <div class="prose">
+        <Content />
+      </div>
+    )
+  }
+  <ul class="tags">
+    {technologies.map((t) => <li class="tag" data-tech={t}>{t}</li>)}
+  </ul>
+</article>
+
+<style>
+  .item {
+    position: relative;
+    padding: 0 0 2.25rem 1.75rem;
+    border-left: 2px solid var(--border);
+    scroll-margin-top: 90px;
+  }
+  .item:last-child {
+    padding-bottom: 0;
+  }
+  .item > * {
+    transition: opacity 0.3s;
+  }
+  .item.dimmed > * {
+    opacity: 0.3;
+  }
+  .dot {
+    position: absolute;
+    left: -7px;
+    top: 0.35rem;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px var(--bg);
+    z-index: 1;
+  }
+  .dot.current::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s ease-out infinite;
+  }
+  @keyframes pulse {
+    from {
+      transform: scale(1);
+      opacity: 0.6;
+    }
+    to {
+      transform: scale(2.6);
+      opacity: 0;
+    }
+  }
+  .period {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-bottom: 0.25rem;
+  }
+  .badge {
+    font-family: var(--font);
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 0.1rem 0.5rem;
+  }
+  h3 {
+    margin-bottom: 0.15rem;
+  }
+  .loc {
+    font-size: 0.9rem;
+  }
+  .tag {
+    transition:
+      background 0.2s,
+      color 0.2s,
+      box-shadow 0.2s;
+  }
+  .tag.match {
+    background: var(--accent);
+    color: var(--bg);
+  }
+</style>
