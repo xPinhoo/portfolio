@@ -1,0 +1,199 @@
+---
+import type { CollectionEntry } from 'astro:content';
+
+type Team = CollectionEntry<'experience'>['data']['teams'][number];
+type Role = Team['members'][number]['role'];
+
+interface Props {
+  teams: Team[];
+}
+
+const { teams } = Astro.props;
+
+const roles: Record<Role, { one: string; many: string; key: string }> = {
+  frontend: { one: 'front-end dev', many: 'front-end devs', key: 'fe' },
+  backend: { one: 'back-end dev', many: 'back-end devs', key: 'be' },
+  qa: { one: 'QA', many: 'QAs', key: 'qa' },
+  po: { one: 'product owner', many: 'product owners', key: 'pm' },
+  sm: { one: 'scrum master', many: 'scrum masters', key: 'pm' },
+  'po-sm': { one: 'product owner / scrum master', many: 'product owners / scrum masters', key: 'pm' },
+};
+
+const summarize = (team: Team) => {
+  const size = team.members.reduce((n, m) => n + m.count, 0);
+  const parts = team.members.map((m) => {
+    const r = roles[m.role];
+    if (m.me) return `me (${r.one.replace(' dev', '')}${m.note ? `, ${m.note}` : ''})`;
+    return `${m.count} ${m.note ? `${m.note} ` : ''}${m.count === 1 ? r.one : r.many}`;
+  });
+  return { size, text: parts.join(', ') };
+};
+
+// One dot per person, "me" first.
+const dots = (team: Team) =>
+  [...team.members]
+    .sort((a, b) => Number(b.me) - Number(a.me))
+    .flatMap((m) =>
+      Array.from({ length: m.count }, () => ({
+        key: roles[m.role].key,
+        me: m.me,
+        label: m.me ? 'Me' : `${m.note ? `${m.note} ` : ''}${roles[m.role].one}`,
+      })),
+    );
+
+const legend = [
+  { key: 'fe', label: 'Front-end' },
+  { key: 'be', label: 'Back-end' },
+  { key: 'qa', label: 'QA' },
+  { key: 'pm', label: 'Product / Scrum' },
+];
+---
+
+{
+  teams.length > 0 && (
+    <div class="teams">
+      <p class="title">{teams.length > 1 ? `${teams.length} teams` : 'Team'}</p>
+      {teams.map((team) => {
+        const s = summarize(team);
+        return (
+          <div class:list={['team', { lead: team.lead }]}>
+            <div class="head">
+              {team.name && <span class="name">{team.name}</span>}
+              {team.lead && <span class="lead-badge">Led by me</span>}
+              <span class="size">{s.size} people</span>
+            </div>
+            <div class="dots" aria-hidden="true">
+              {dots(team).map((d) => (
+                <span class:list={['dot', d.key, { me: d.me }]} title={d.label} />
+              ))}
+            </div>
+            <p class="desc">{s.text}</p>
+            {team.note && <p class="desc note">{team.note}</p>}
+          </div>
+        );
+      })}
+      <ul class="legend" aria-hidden="true">
+        {legend.map((l) => (
+          <li>
+            <span class:list={['dot', 'small', l.key]} />
+            {l.label}
+          </li>
+        ))}
+      </ul>
+    </div>
+  )
+}
+
+<style>
+  .teams {
+    --fe: var(--accent);
+    --be: #5b8def;
+    --qa: #d9a23b;
+    --pm: #9b8cf5;
+    margin: 0.25rem 0 1rem;
+    padding: 0.85rem 1rem;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--surface);
+  }
+  .title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+  }
+  .team + .team {
+    margin-top: 0.85rem;
+    padding-top: 0.85rem;
+    border-top: 1px dashed var(--border);
+  }
+  .head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.6rem;
+    margin-bottom: 0.45rem;
+  }
+  .name {
+    font-weight: 600;
+    font-size: 0.92rem;
+  }
+  .size {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+  .lead-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--bg);
+    background: var(--accent);
+    border-radius: 999px;
+    padding: 0.08rem 0.5rem;
+  }
+  .dots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 0.4rem;
+  }
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--c);
+    flex-shrink: 0;
+  }
+  .dot.fe {
+    --c: var(--fe);
+  }
+  .dot.be {
+    --c: var(--be);
+  }
+  .dot.qa {
+    --c: var(--qa);
+  }
+  .dot.pm {
+    --c: var(--pm);
+  }
+  .dot.me {
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 0 4px var(--c);
+    margin: 0 4px;
+  }
+  .dot.small {
+    width: 9px;
+    height: 9px;
+  }
+  .desc {
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin: 0;
+    line-height: 1.45;
+  }
+  .note {
+    margin-top: 0.2rem;
+    font-style: italic;
+  }
+  .legend {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem 0.9rem;
+    margin: 0.75rem 0 0;
+    padding: 0.6rem 0 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+  .legend li {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+</style>

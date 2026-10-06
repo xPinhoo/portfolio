@@ -1,6 +1,7 @@
 ---
 import { render, type CollectionEntry } from 'astro:content';
 import { formatDuration, formatPeriod, monthsBetween } from '../lib/content';
+import TeamView from './TeamView.astro';
 
 interface Props {
   job: CollectionEntry<'experience'>;
@@ -8,7 +9,7 @@ interface Props {
 }
 
 const { job, compact = false } = Astro.props;
-const { company, tagline, role, location, start, end, technologies } = job.data;
+const { company, tagline, role, location, start, end, technologies, highlights, teams } = job.data;
 const current = !end;
 const { Content } = await render(job);
 ---
@@ -22,12 +23,22 @@ const { Content } = await render(job);
   <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}</h3>
   <p class="muted loc">{location}</p>
   {
+    highlights.length > 0 && (
+      <ul class="highlights">
+        {highlights.map((h) => (
+          <li>{h}</li>
+        ))}
+      </ul>
+    )
+  }
+  {
     !compact && (
       <div class="prose">
         <Content />
       </div>
     )
   }
+  {!compact && <TeamView teams={teams} />}
   <ul class="tags">
     {technologies.map((t) => <li class="tag" data-tech={t}>{t}</li>)}
   </ul>
@@ -104,6 +115,23 @@ const { Content } = await render(job);
   }
   .loc {
     font-size: 0.9rem;
+  }
+  .highlights {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0;
+    margin: 0.2rem 0 0.9rem;
+  }
+  .highlights li {
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 0.15rem 0.55rem;
   }
   .tag {
     transition:

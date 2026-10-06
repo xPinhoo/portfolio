@@ -12,6 +12,24 @@ const experience = defineCollection({
     start: z.coerce.date(),
     end: z.coerce.date().optional(), // omit for current role
     technologies: z.array(z.string()),
+    highlights: z.array(z.string()).default([]), // short badges shown next to the role
+    teams: z
+      .array(
+        z.object({
+          name: z.string().optional(), // only needed when a job had several teams
+          lead: z.boolean().default(false),
+          note: z.string().optional(),
+          members: z.array(
+            z.object({
+              role: z.enum(['frontend', 'backend', 'qa', 'po', 'sm', 'po-sm']),
+              count: z.number().default(1),
+              me: z.boolean().default(false),
+              note: z.string().optional(), // e.g. "junior", "Team Lead"
+            }),
+          ),
+        }),
+      )
+      .default([]),
   }),
 });
 
