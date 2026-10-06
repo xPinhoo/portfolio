@@ -14,6 +14,18 @@ const experience = defineCollection({
     end: z.coerce.date().optional(), // omit for current role
     technologies: z.array(z.string()),
     highlights: z.array(z.string()).default([]), // short badges shown next to the role
+    recommendations: z
+      .array(
+        z.object({
+          author: z.string(),
+          role: z.string(),
+          relation: z.string(), // e.g. "Managed Francisco directly"
+          date: z.string(),
+          quote: z.string(),
+          url: z.string().url().optional(),
+        }),
+      )
+      .default([]),
     teams: z
       .array(
         z.object({

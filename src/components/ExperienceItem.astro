@@ -2,6 +2,7 @@
 import { render, type CollectionEntry } from 'astro:content';
 import { formatDuration, formatPeriod, monthsBetween } from '../lib/content';
 import TeamView from './TeamView.astro';
+import RecommendationCard from './RecommendationCard.astro';
 
 interface Props {
   job: CollectionEntry<'experience'>;
@@ -9,7 +10,7 @@ interface Props {
 }
 
 const { job, compact = false } = Astro.props;
-const { company, tagline, client, role, location, start, end, technologies, highlights, teams } = job.data;
+const { company, tagline, client, role, location, start, end, technologies, highlights, teams, recommendations } = job.data;
 const current = !end;
 const { Content } = await render(job);
 ---
@@ -39,6 +40,7 @@ const { Content } = await render(job);
     )
   }
   {!compact && <TeamView teams={teams} />}
+  {!compact && recommendations.map((rec) => <RecommendationCard rec={rec} />)}
   <ul class="tags">
     {technologies.map((t) => <li class="tag" data-tech={t}>{t}</li>)}
   </ul>
