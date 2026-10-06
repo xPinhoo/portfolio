@@ -10,8 +10,12 @@ recommendations:
   - author: Bruno Pires
     role: Software Development Manager
     relation: Managed Francisco directly
-    date: March 2021
-    quote: I managed Francisco for approximately 2 years, and I can say it has been a pleasure. Francisco allowed me to create a good work environment and all the team had a good relationship with him.
+    date: March 25, 2021
+    quote: >-
+      I managed Francisco for proximally 2 years, and I say it was been a pleasure. Francisco allowed me to
+      create a good work environment and all the team had a good relationship with him. I had the pleasure to
+      work with him in his first job as a software developer, I want to highlight are the capability of
+      delivery a good work, the well to acquire knowledge to always delivery an exemplary solution.
     url: https://www.linkedin.com/in/francisco-pinho/details/recommendations/
 teams:
   - members:
