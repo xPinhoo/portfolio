@@ -7,6 +7,7 @@ const experience = defineCollection({
   schema: z.object({
     company: z.string(),
     tagline: z.string().optional(),
+    client: z.string().optional(), // for consultancy work, e.g. Celfocus → Vodafone
     role: z.string(),
     location: z.string(),
     start: z.coerce.date(),

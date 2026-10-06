@@ -11,7 +11,7 @@ export const profile = {
   name: 'Francisco Pinho Oliveira',
   shortName: 'Francisco Oliveira',
   role: 'Front-End Developer',
-  location: 'Lisbon, Portugal',
+  location: 'Figueira da Foz, Portugal',
   headline: `Front-End Developer with ${yearsOfExperience}+ years building scalable web applications with Vue.js, Angular, TypeScript and Adobe Experience Manager.`,
   summary:
     'I design and develop enterprise-grade web applications, with a focus on reusable component architectures, close collaboration with UI/UX designers, and clean, maintainable codebases. I have worked across fleet management, telecom e-commerce and CRM platforms, from project inception to large-scale, customer-facing products.',
@@ -68,6 +68,6 @@ export const languages = [
 
 export const highlights = [
   { value: `${yearsOfExperience}+`, label: 'years in enterprise front-end' },
-  { value: '3', label: 'companies: Frotcom, Vodafone, Altice Labs' },
+  { value: '3', label: 'companies: Frotcom, Celfocus (for Vodafone), Altice Labs' },
   { value: 'ACE', label: 'Adobe Certified Expert, AEM Sites' },
 ];

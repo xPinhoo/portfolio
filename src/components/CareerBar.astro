@@ -16,7 +16,7 @@ const segments = jobs.map((job, i) => {
   const months = monthsBetween(job.data.start, job.data.end);
   return {
     id: job.id,
-    company: job.data.company,
+    company: job.data.client ? `${job.data.company} · ${job.data.client}` : job.data.company,
     role: job.data.role,
     months,
     duration: formatDuration(months),

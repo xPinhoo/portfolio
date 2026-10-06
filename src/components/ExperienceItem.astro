@@ -9,7 +9,7 @@ interface Props {
 }
 
 const { job, compact = false } = Astro.props;
-const { company, tagline, role, location, start, end, technologies, highlights, teams } = job.data;
+const { company, tagline, client, role, location, start, end, technologies, highlights, teams } = job.data;
 const current = !end;
 const { Content } = await render(job);
 ---
@@ -20,7 +20,7 @@ const { Content } = await render(job);
     <span>{formatPeriod(start, end)}</span><span class="sep" aria-hidden="true">·</span><span>{formatDuration(monthsBetween(start, end))}</span>
     {current && <span class="badge">Current</span>}
   </p>
-  <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}</h3>
+  <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}{client && <span class="muted"> — client: {client}</span>}</h3>
   <p class="muted loc">{location}</p>
   {
     highlights.length > 0 && (

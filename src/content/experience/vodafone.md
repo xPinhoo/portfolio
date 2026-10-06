@@ -1,5 +1,6 @@
 ---
-company: Vodafone
+company: Celfocus
+client: Vodafone
 role: Frontend Developer
 location: Lisbon, Portugal
 start: 2021-06-01
