@@ -66,4 +66,30 @@ const projects = defineCollection({
     }),
 });
 
-export const collections = { experience, projects };
+// Portuguese translations. Each file shares its id with the English entry and only overrides the text;
+// dates, technologies and team composition always come from the English file.
+const experiencePt = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pt/experience' }),
+  schema: z.object({
+    tagline: z.string().optional(),
+    role: z.string().optional(),
+    location: z.string().optional(),
+    highlights: z.array(z.string()).optional(),
+    // Matched by position with the English entry.
+    recommendations: z.array(z.object({ relation: z.string(), date: z.string() })).optional(),
+    teams: z.array(z.object({ name: z.string().optional(), note: z.string().optional() })).optional(),
+  }),
+});
+
+const projectsPt = defineCollection({
+  loader: glob({ pattern: '**/*.md', base: './src/content/pt/projects' }),
+  schema: z.object({
+    title: z.string(),
+    summary: z.string(),
+    period: z.coerce.string().optional(),
+    role: z.string().optional(),
+    tech: z.array(z.string()).optional(),
+  }),
+});
+
+export const collections = { experience, projects, experiencePt, projectsPt };

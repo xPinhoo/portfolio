@@ -3,12 +3,15 @@ interface Props {
   status: 'completed' | 'ongoing';
 }
 
+import { langOf, t } from '../i18n';
+
 const { status } = Astro.props;
+const ui = t(langOf(Astro.url));
 ---
 
 <span class:list={['status', status]}>
   {status === 'ongoing' && <span class="pulse" aria-hidden="true" />}
-  {status === 'ongoing' ? 'In progress' : 'Completed'}
+  {status === 'ongoing' ? ui.inProgress : ui.completed}
 </span>
 
 <style>

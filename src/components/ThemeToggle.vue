@@ -2,6 +2,9 @@
 import { computed, onMounted, ref } from 'vue';
 
 type Theme = 'light' | 'dark';
+const props = withDefaults(defineProps<{ labels?: { toLight: string; toDark: string } }>(), {
+  labels: () => ({ toLight: 'Switch to light theme', toDark: 'Switch to dark theme' }),
+});
 const theme = ref<Theme>('light');
 
 onMounted(() => {
@@ -9,7 +12,7 @@ onMounted(() => {
   theme.value = explicit ?? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
 });
 
-const label = computed(() => (theme.value === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'));
+const label = computed(() => (theme.value === 'dark' ? props.labels.toLight : props.labels.toDark));
 
 function toggle() {
   theme.value = theme.value === 'dark' ? 'light' : 'dark';

@@ -1,18 +1,39 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { links, profile } from '../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { links, profile } from '../../data/site';
+import { langOf, langPaths, t } from '../../i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = langOf(Astro.url);
+const copy = {
+  en: {
+    title: 'Contact',
+    description: `Get in touch with ${profile.name}`,
+    heading: "Let's talk.",
+    lead: 'Always happy to talk about interesting projects and roles. The fastest way to reach me is by email or LinkedIn.',
+    based: 'Based in',
+  },
+  pt: {
+    title: 'Contacto',
+    description: `Entre em contacto com ${profile.name}`,
+    heading: 'Vamos conversar.',
+    lead: 'Estou sempre disponível para falar sobre projetos e oportunidades interessantes. A forma mais rápida de me contactar é por email ou LinkedIn.',
+    based: 'Localização',
+  },
+}[lang];
 ---
 
-<BaseLayout title="Contact" description={`Get in touch with ${profile.name}`}>
+<BaseLayout title={copy.title} description={copy.description}>
   <section class="container section narrow">
-    <p class="eyebrow">Contact</p>
-    <h1>Let's talk.</h1>
+    <p class="eyebrow">{copy.title}</p>
+    <h1>{copy.heading}</h1>
     <p class="muted lead">
-      Always happy to talk about interesting projects and roles. The fastest way to reach me is by email or LinkedIn.
+      {copy.lead}
     </p>
     <div class="list">
       <a class="card row" href={`mailto:${profile.email}`}>
-        <span class="muted">Email</span>
+        <span class="muted">{t(lang).email}</span>
         <strong>{profile.email}</strong>
       </a>
       <a class="card row" href={links.linkedin} target="_blank" rel="noopener">
@@ -28,7 +49,7 @@ import { links, profile } from '../data/site';
         )
       }
       <div class="card row">
-        <span class="muted">Based in</span>
+        <span class="muted">{copy.based}</span>
         <strong>{profile.location}</strong>
       </div>
     </div>

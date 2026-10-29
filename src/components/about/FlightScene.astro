@@ -1,6 +1,12 @@
 ---
 // Flight path that takes off, changes course at the injury and lands on a screen.
 // The page script adds .flying when visible and starts the plane's <animateMotion>.
+import { langOf } from '../../i18n';
+
+const copy = {
+  en: { steps: [['Takeoff', 'Air Force'], ['Course change', 'back injury'], ['Landing', 'computers']], replay: '↻ Replay flight' },
+  pt: { steps: [['Descolagem', 'Força Aérea'], ['Mudança de rumo', 'lesão nas costas'], ['Aterragem', 'computadores']], replay: '↻ Repetir voo' },
+}[langOf(Astro.url)];
 const route = 'M20 170 C 120 165, 170 40, 290 38 C 370 36, 405 52, 430 80 C 465 120, 520 146, 586 146';
 ---
 
@@ -31,11 +37,9 @@ const route = 'M20 170 C 120 165, 170 40, 290 38 C 370 36, 405 52, 430 80 C 465 
   </svg>
   <figcaption>
     <ol>
-      <li><span>Takeoff</span> Air Force</li>
-      <li><span>Course change</span> back injury</li>
-      <li><span>Landing</span> computers</li>
+      {copy.steps.map(([step, what]) => <li><span>{step}</span> {what}</li>)}
     </ol>
-    <button type="button" class="replay" data-replay>↻ Replay flight</button>
+    <button type="button" class="replay" data-replay>{copy.replay}</button>
   </figcaption>
 </figure>
 

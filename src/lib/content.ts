@@ -1,21 +1,50 @@
-import { getCollection } from 'astro:content';
+import { getCollection, type CollectionEntry } from 'astro:content';
+import { formatMonth, t, type Lang } from '../i18n';
+
+// Entries keep the English data and get the Portuguese text merged in; `source` is the entry to render().
 
 /** Projects sorted by `order`; drafts only appear in dev. */
-export async function getProjects() {
+export async function getProjects(lang: Lang = 'en') {
   const all = await getCollection('projects', ({ data }) => import.meta.env.DEV || !data.draft);
-  return all.sort((a, b) => a.data.order - b.data.order);
+  const pt = lang === 'pt' ? await getCollection('projectsPt') : [];
+  return all
+    .sort((a, b) => a.data.order - b.data.order)
+    .map((p) => {
+      const tr = pt.find((x) => x.id === p.id);
+      const data = tr ? { ...p.data, ...strip(tr.data) } : p.data;
+      return { ...p, data, source: (tr ?? p) as CollectionEntry<'projects' | 'projectsPt'> };
+    });
 }
+export type Project = Awaited<ReturnType<typeof getProjects>>[number];
 
 /** Experience, most recent first. */
-export async function getExperience() {
+export async function getExperience(lang: Lang = 'en') {
   const all = await getCollection('experience');
-  return all.sort((a, b) => b.data.start.getTime() - a.data.start.getTime());
+  const pt = lang === 'pt' ? await getCollection('experiencePt') : [];
+  return all
+    .sort((a, b) => b.data.start.getTime() - a.data.start.getTime())
+    .map((job) => {
+      const tr = pt.find((x) => x.id === job.id);
+      if (!tr) return { ...job, source: job as CollectionEntry<'experience' | 'experiencePt'> };
+      const { recommendations, teams, ...text } = strip(tr.data);
+      const data = {
+        ...job.data,
+        ...text,
+        recommendations: job.data.recommendations.map((r, i) => ({ ...r, ...recommendations?.[i] })),
+        teams: job.data.teams.map((team, i) => ({ ...team, ...strip(teams?.[i] ?? {}) })),
+      };
+      return { ...job, data, source: tr as CollectionEntry<'experience' | 'experiencePt'> };
+    });
+}
+export type Job = Awaited<ReturnType<typeof getExperience>>[number];
+
+/** Drop undefined keys so they don't overwrite the English values. */
+function strip<T extends object>(o: T) {
+  return Object.fromEntries(Object.entries(o).filter(([, v]) => v !== undefined)) as T;
 }
 
-const fmt = new Intl.DateTimeFormat('en', { month: 'short', year: 'numeric', timeZone: 'UTC' });
-
-export function formatPeriod(start: Date, end?: Date) {
-  return `${fmt.format(start)} — ${end ? fmt.format(end) : 'Present'}`;
+export function formatPeriod(start: Date, end: Date | undefined, lang: Lang = 'en') {
+  return `${formatMonth(start, lang)} — ${end ? formatMonth(end, lang) : t(lang).present}`;
 }
 
 // --- Durations -----------------------------------------------------------------
@@ -34,20 +63,22 @@ export function monthsBetween(start: Date, end?: Date) {
   return jobMonthRange(start, end).length;
 }
 
-const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
+const plural = (n: number, [one, many]: string[]) => `${n} ${n === 1 ? one : many}`;
 
-/** "3 yrs 9 mos" */
-export function formatDuration(months: number) {
+/** "3 yrs 9 mos" / "3 anos 9 meses" */
+export function formatDuration(months: number, lang: Lang = 'en') {
+  const { yr, mo } = t(lang).dur;
   const y = Math.floor(months / 12);
   const m = months % 12;
-  return [y && plural(y, 'yr'), m && plural(m, 'mo')].filter(Boolean).join(' ') || '1 mo';
+  return [y && plural(y, yr), m && plural(m, mo)].filter(Boolean).join(' ') || plural(1, mo);
 }
 
 /** "5+ yrs" style rounding for skills. */
-export function formatYears(months: number) {
-  if (months < 12) return plural(months, 'mo');
+export function formatYears(months: number, lang: Lang = 'en') {
+  const { yr, mo } = t(lang).dur;
+  if (months < 12) return plural(months, mo);
   const y = Math.floor(months / 12);
-  return `${y}${months % 12 ? '+' : ''} ${y === 1 ? 'yr' : 'yrs'}`;
+  return `${y}${months % 12 ? '+' : ''} ${y === 1 ? yr[0] : yr[1]}`;
 }
 
 /** Months of experience with any of `techs`, without double-counting overlapping jobs. */

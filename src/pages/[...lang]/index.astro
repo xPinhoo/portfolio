@@ -1,33 +1,60 @@
 ---
 import { Image } from 'astro:assets';
-import profilePhoto from '../assets/profile.jpg';
-import BaseLayout from '../layouts/BaseLayout.astro';
-import ProjectCard from '../components/ProjectCard.astro';
-import ExperienceItem from '../components/ExperienceItem.astro';
-import { getExperience, getProjects } from '../lib/content';
-import { highlights, links, profile } from '../data/site';
+import profilePhoto from '../../assets/profile.jpg';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import ExperienceItem from '../../components/ExperienceItem.astro';
+import { getExperience, getProjects } from '../../lib/content';
+import { highlights, links, profile } from '../../data/site';
+import { href, langOf, langPaths, t } from '../../i18n';
 
-const experience = await getExperience();
-const projects = (await getProjects()).slice(0, 3);
+export const getStaticPaths = langPaths;
+
+const lang = langOf(Astro.url);
+const experience = await getExperience(lang);
+const projects = (await getProjects(lang)).slice(0, 3);
+const firstName = profile.shortName.split(' ')[0];
+const copy = {
+  en: {
+    hi: `Hi, I'm ${firstName}.`,
+    viewExperience: 'View experience',
+    cv: 'Download CV',
+    emailMe: 'Email me',
+    recent: 'Recent experience',
+    fullCv: 'Full CV →',
+    side: 'Side projects',
+    allProjects: 'All projects →',
+  },
+  pt: {
+    hi: `Olá, sou o ${firstName}.`,
+    viewExperience: 'Ver experiência',
+    cv: 'Descarregar CV',
+    emailMe: 'Enviar email',
+    recent: 'Experiência recente',
+    fullCv: 'CV completo →',
+    side: 'Projetos pessoais',
+    allProjects: 'Todos os projetos →',
+  },
+}[lang];
 ---
 
 <BaseLayout>
   <section class="container hero">
     <div class="intro">
       <p class="eyebrow">{profile.role} · {profile.location}</p>
-      <h1>Hi, I'm {profile.shortName.split(' ')[0]}.</h1>
-      <p class="lead">{profile.headline}</p>
+      <h1>{copy.hi}</h1>
+      <p class="lead">{profile.headline[lang]}</p>
       <div class="actions">
-        <a class="btn primary" href="/experience">View experience</a>
-        {profile.hasCv && <a class="btn" href="/cv.pdf" download>Download CV</a>}
+        <a class="btn primary" href={href(lang, '/experience')}>{copy.viewExperience}</a>
+        {profile.hasCv && <a class="btn" href="/cv.pdf" download>{copy.cv}</a>}
         <a class="btn" href={links.linkedin} target="_blank" rel="noopener">LinkedIn</a>
-        <a class="btn" href={`mailto:${profile.email}`}>Email me</a>
+        <a class="btn" href={`mailto:${profile.email}`}>{copy.emailMe}</a>
       </div>
     </div>
     <Image
       class="avatar"
       src={profilePhoto}
-      alt={`Portrait of ${profile.name}`}
+      alt={t(lang).portraitOf(profile.name)}
       width={480}
       loading="eager"
     />
@@ -39,7 +66,7 @@ const projects = (await getProjects()).slice(0, 3);
         highlights.map((h) => (
           <li class="card">
             <strong>{h.value}</strong>
-            <span class="muted">{h.label}</span>
+            <span class="muted">{h.label[lang]}</span>
           </li>
         ))
       }
@@ -48,8 +75,8 @@ const projects = (await getProjects()).slice(0, 3);
 
   <section class="container section">
     <div class="head">
-      <h2>Recent experience</h2>
-      <a href="/experience">Full CV →</a>
+      <h2>{copy.recent}</h2>
+      <a href={href(lang, '/experience')}>{copy.fullCv}</a>
     </div>
     <div>
       {experience.map((job) => <ExperienceItem job={job} compact />)}
@@ -60,8 +87,8 @@ const projects = (await getProjects()).slice(0, 3);
     projects.length > 0 && (
       <section class="container section">
         <div class="head">
-          <h2>Side projects</h2>
-          <a href="/projects">All projects →</a>
+          <h2>{copy.side}</h2>
+          <a href={href(lang, '/projects')}>{copy.allProjects}</a>
         </div>
         <div class="grid">
           {projects.map((p) => (

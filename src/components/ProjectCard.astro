@@ -1,18 +1,21 @@
 ---
 import { Image } from 'astro:assets';
-import type { CollectionEntry } from 'astro:content';
+import type { Project } from '../lib/content';
+import { href, langOf, t } from '../i18n';
 import StatusBadge from './StatusBadge.astro';
 import ProjectVisual from './ProjectVisual.astro';
 
 interface Props {
-  project: CollectionEntry<'projects'>;
+  project: Project;
 }
 
 const { project } = Astro.props;
+const lang = langOf(Astro.url);
+const ui = t(lang);
 const { title, summary, tech, cover, visual, draft, status, period, interactive } = project.data;
 ---
 
-<a class="card project reveal" href={`/projects/${project.id}`}>
+<a class="card project reveal" href={href(lang, `/projects/${project.id}`)}>
   {
     cover ? (
       <Image class="cover" src={cover} alt="" width={640} loading="lazy" />
@@ -29,7 +32,7 @@ const { title, summary, tech, cover, visual, draft, status, period, interactive 
   <div class="meta">
     <StatusBadge status={status} />
     <span class="period">{period}</span>
-    {interactive && <span class="live">▶ Try it live</span>}
+    {interactive && <span class="live">{ui.tryLive}</span>}
     {draft && <span class="draft">draft</span>}
   </div>
   <h3>{title}</h3>
@@ -37,7 +40,7 @@ const { title, summary, tech, cover, visual, draft, status, period, interactive 
   <ul class="tags">
     {tech.map((t) => <li class="tag">{t}</li>)}
   </ul>
-  <span class="more">Read more →</span>
+  <span class="more">{ui.readMore}</span>
 </a>
 
 <style>

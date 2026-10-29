@@ -1,13 +1,15 @@
 ---
 import ThemeToggle from './ThemeToggle.vue';
 import { profile } from '../data/site';
+import { href, langOf, switchPath, t } from '../i18n';
 
-const nav = [
-  { href: '/about', label: 'About' },
-  { href: '/experience', label: 'Experience' },
-  { href: '/projects', label: 'Projects' },
-  { href: '/contact', label: 'Contact' },
-];
+const lang = langOf(Astro.url);
+const other = lang === 'en' ? 'pt' : 'en';
+const { nav: labels, switchTo, theme } = t(lang);
+const nav = (['about', 'experience', 'projects', 'contact'] as const).map((key) => ({
+  href: href(lang, `/${key}`),
+  label: labels[key],
+}));
 
 const path = Astro.url.pathname.replace(/\/$/, '');
 const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
@@ -15,7 +17,7 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
 
 <header>
   <div class="container bar">
-    <a href="/" class="brand">{profile.shortName}</a>
+    <a href={href(lang, '/')} class="brand">{profile.shortName}</a>
     <nav aria-label="Main">
       {
         nav.map((item) => (
@@ -24,8 +26,14 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
           </a>
         ))
       }
-      <ThemeToggle client:load />
     </nav>
+    <div class="tools">
+      <a class="lang" data-lang-switch href={switchPath(Astro.url.pathname, other)} hreflang={other} lang={other} title={switchTo}>
+        <span class:list={{ on: lang === 'en' }}>EN</span><span class:list={{ on: lang === 'pt' }}>PT</span>
+        <span class="sr">{switchTo}</span>
+      </a>
+      <ThemeToggle client:load labels={theme} />
+    </div>
   </div>
 </header>
 
@@ -71,13 +79,59 @@ const isActive = (href: string) => path === href || path.startsWith(`${href}/`);
       }
     }
   }
+  nav {
+    margin-left: auto;
+  }
+  .tools {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .lang {
+    display: inline-flex;
+    color: var(--muted);
+    text-decoration: none;
+    padding: 2px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    span {
+      padding: 0.2rem 0.45rem;
+      border-radius: 999px;
+      transition:
+        background 0.2s,
+        color 0.2s;
+    }
+    .on {
+      background: var(--accent);
+      color: var(--bg);
+    }
+    &:hover {
+      border-color: var(--accent);
+    }
+    .sr {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      overflow: hidden;
+      clip-path: inset(50%);
+    }
+  }
   @media (max-width: 560px) {
     .bar {
       padding-top: 0.6rem;
       padding-bottom: 0.6rem;
     }
+    .tools {
+      order: 1;
+    }
     nav {
+      order: 2;
       width: 100%;
+      margin-left: 0;
       justify-content: space-between;
     }
   }

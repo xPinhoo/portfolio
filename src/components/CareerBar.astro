@@ -1,12 +1,13 @@
 ---
-import type { CollectionEntry } from 'astro:content';
-import { formatDuration, monthsBetween } from '../lib/content';
+import { formatDuration, monthsBetween, type Job } from '../lib/content';
+import { langOf } from '../i18n';
 
 interface Props {
-  jobs: CollectionEntry<'experience'>[];
+  jobs: Job[];
 }
 
 // Oldest first, left to right.
+const lang = langOf(Astro.url);
 const jobs = [...Astro.props.jobs].sort((a, b) => a.data.start.getTime() - b.data.start.getTime());
 const first = jobs[0].data.start;
 const total = monthsBetween(first);
@@ -19,7 +20,7 @@ const segments = jobs.map((job, i) => {
     company: job.data.client ? `${job.data.company} · ${job.data.client}` : job.data.company,
     role: job.data.role,
     months,
-    duration: formatDuration(months),
+    duration: formatDuration(months, lang),
     current: !job.data.end,
     tech: job.data.technologies.join('|'),
     // Later roles get a stronger tint.

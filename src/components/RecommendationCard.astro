@@ -1,13 +1,15 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { Job } from '../lib/content';
+import { langOf, t } from '../i18n';
 
-type Recommendation = CollectionEntry<'experience'>['data']['recommendations'][number];
+type Recommendation = Job['data']['recommendations'][number];
 
 interface Props {
   rec: Recommendation;
 }
 
 const { rec } = Astro.props;
+const ui = t(langOf(Astro.url)).rec;
 const initials = rec.author
   .split(' ')
   .map((w) => w[0])
@@ -17,9 +19,10 @@ const initials = rec.author
 
 <figure class="rec">
   <span class="mark" aria-hidden="true">“</span>
-  <blockquote>
+  <blockquote lang="en">
     <p>{rec.quote}</p>
   </blockquote>
+  {ui.original && <p class="original">{ui.original}</p>}
   <figcaption>
     <span class="avatar" aria-hidden="true">{initials}</span>
     <span class="who">
@@ -29,7 +32,7 @@ const initials = rec.author
     {
       rec.url && (
         <a class="link" href={rec.url} target="_blank" rel="noopener">
-          View on LinkedIn ↗
+          {ui.linkedin}
         </a>
       )
     }
@@ -65,6 +68,11 @@ const initials = rec.author
     font-size: 1rem;
     line-height: 1.6;
     font-style: italic;
+  }
+  .original {
+    margin: 0.4rem 0 0;
+    font-size: 0.75rem;
+    color: var(--muted);
   }
   figcaption {
     display: flex;

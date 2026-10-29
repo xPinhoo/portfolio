@@ -9,5 +9,5 @@ import sitemap from '@astrojs/sitemap';
 export default defineConfig({
   // Public address; used for canonical URLs, social previews and the sitemap.
   site: 'https://franciscopinho.vercel.app',
-  integrations: [vue(), sitemap()],
+  integrations: [vue(), sitemap({ i18n: { defaultLocale: 'en', locales: { en: 'en', pt: 'pt-PT' } } })],
 });

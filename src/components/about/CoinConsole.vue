@@ -5,6 +5,41 @@ import { nextTick, ref } from 'vue';
 
 type Line = { kind: 'input' | 'output' | 'error' | 'info'; text: string };
 
+const props = withDefaults(defineProps<{ lang?: 'en' | 'pt' }>(), { lang: 'en' });
+
+// Command names stay in English (they're code); only the messages are translated.
+const copy = {
+  en: {
+    intro: ['// EverWing, Messenger, ~2016. This is roughly what I did.', '// Try: addCoins(1000)  or type help()'],
+    help: ['addCoins(n)  add n coins to your balance', 'getCoins()   show your balance', 'whoami()     who wrote this', 'clear()      clear the console'],
+    notInt: 'Uncaught TypeError: addCoins expects a positive integer',
+    tooMany: 'Uncaught RangeError: even curiosity has limits (max 1,000,000)',
+    added: (n: string, total: string) => `✓ +${n} coins → ${total}`,
+    achievement: 'Achievement unlocked: "Curious mind"',
+    whoami: '"Francisco Oliveira. Front-end developer, curious about how things work."',
+    syntax: 'Uncaught SyntaxError: try something like addCoins(1000)',
+    notDefined: (name: string) => `Uncaught ReferenceError: ${name} is not defined`,
+    input: 'Console input',
+    toastTitle: 'Achievement unlocked: Curious mind',
+    toastNote: 'No real games were harmed in the making of this console.',
+  },
+  pt: {
+    intro: ['// EverWing, Messenger, ~2016. Foi mais ou menos isto que fiz.', '// Experimente: addCoins(1000)  ou escreva help()'],
+    help: ['addCoins(n)  adiciona n moedas ao saldo', 'getCoins()   mostra o saldo', 'whoami()     quem escreveu isto', 'clear()      limpa a consola'],
+    notInt: 'Uncaught TypeError: addCoins espera um número inteiro positivo',
+    tooMany: 'Uncaught RangeError: até a curiosidade tem limites (máx. 1 000 000)',
+    added: (n: string, total: string) => `✓ +${n} moedas → ${total}`,
+    achievement: 'Conquista desbloqueada: "Mente curiosa"',
+    whoami: '"Francisco Oliveira. Front-end developer, curioso sobre como as coisas funcionam."',
+    syntax: 'Uncaught SyntaxError: experimente algo como addCoins(1000)',
+    notDefined: (name: string) => `Uncaught ReferenceError: ${name} não está definido`,
+    input: 'Entrada da consola',
+    toastTitle: 'Conquista desbloqueada: Mente curiosa',
+    toastNote: 'Nenhum jogo verdadeiro foi prejudicado na criação desta consola.',
+  },
+}[props.lang];
+const num = (n: number) => n.toLocaleString(props.lang === 'pt' ? 'pt-PT' : 'en');
+
 const ACHIEVEMENT_AT = 5000;
 const MAX_ADD = 1_000_000;
 
@@ -13,43 +48,35 @@ const shown = ref(120);
 const unlocked = ref(false);
 const toast = ref(false);
 const input = ref('');
-const lines = ref<Line[]>([
-  { kind: 'info', text: '// EverWing, Messenger, ~2016. This is roughly what I did.' },
-  { kind: 'info', text: '// Try: addCoins(1000)  or type help()' },
-]);
+const lines = ref<Line[]>(copy.intro.map((text) => ({ kind: 'info', text })));
 const logEl = ref<HTMLElement | null>(null);
 const inputEl = ref<HTMLInputElement | null>(null);
 
 const suggestions = ['addCoins(1000)', 'addCoins(5000)', 'whoami()', 'help()'];
 
 const commands: Record<string, (arg: string) => Line[] | void> = {
-  help: () => [
-    { kind: 'output', text: 'addCoins(n)  add n coins to your balance' },
-    { kind: 'output', text: 'getCoins()   show your balance' },
-    { kind: 'output', text: 'whoami()     who wrote this' },
-    { kind: 'output', text: 'clear()      clear the console' },
-  ],
+  help: () => copy.help.map((text) => ({ kind: 'output', text })),
   addCoins: (arg) => {
     const n = arg.trim() === '' ? 100 : Number(arg);
     if (!Number.isInteger(n) || n <= 0) {
-      return [{ kind: 'error', text: `Uncaught TypeError: addCoins expects a positive integer` }];
+      return [{ kind: 'error', text: copy.notInt }];
     }
     if (n > MAX_ADD) {
-      return [{ kind: 'error', text: 'Uncaught RangeError: even curiosity has limits (max 1,000,000)' }];
+      return [{ kind: 'error', text: copy.tooMany }];
     }
     coins.value += n;
     tweenCoins();
-    const out: Line[] = [{ kind: 'output', text: `✓ +${n.toLocaleString('en')} coins → ${coins.value.toLocaleString('en')}` }];
+    const out: Line[] = [{ kind: 'output', text: copy.added(num(n), num(coins.value)) }];
     if (!unlocked.value && coins.value >= ACHIEVEMENT_AT) {
       unlocked.value = true;
       toast.value = true;
       setTimeout(() => (toast.value = false), 5000);
-      out.push({ kind: 'info', text: '🏆 Achievement unlocked: "Curious mind"' });
+      out.push({ kind: 'info', text: `🏆 ${copy.achievement}` });
     }
     return out;
   },
-  getCoins: () => [{ kind: 'output', text: coins.value.toLocaleString('en') }],
-  whoami: () => [{ kind: 'output', text: '"Francisco Oliveira. Front-end developer, curious about how things work."' }],
+  getCoins: () => [{ kind: 'output', text: num(coins.value) }],
+  whoami: () => [{ kind: 'output', text: copy.whoami }],
   clear: () => {
     lines.value = [];
   },
@@ -62,11 +89,11 @@ function run(raw: string) {
 
   const match = src.match(/^([A-Za-z_$][\w$]*)\s*\(([^()]*)\)\s*;?$/);
   if (!match) {
-    lines.value.push({ kind: 'error', text: 'Uncaught SyntaxError: try something like addCoins(1000)' });
+    lines.value.push({ kind: 'error', text: copy.syntax });
   } else {
     const [, name, arg] = match;
     const fn = commands[name];
-    const out = fn ? fn(arg) : [{ kind: 'error' as const, text: `Uncaught ReferenceError: ${name} is not defined` }];
+    const out = fn ? fn(arg) : [{ kind: 'error' as const, text: copy.notDefined(name) }];
     if (out) lines.value.push(...out);
   }
 
@@ -108,7 +135,7 @@ function tweenCoins() {
       <span class="title">Console</span>
       <span class="coins" aria-live="polite">
         <span class="coin" aria-hidden="true"></span>
-        {{ shown.toLocaleString('en') }}
+        {{ num(shown) }}
       </span>
     </div>
 
@@ -125,7 +152,7 @@ function tweenCoins() {
           spellcheck="false"
           autocomplete="off"
           autocapitalize="off"
-          aria-label="Console input"
+          :aria-label="copy.input"
           placeholder="addCoins(1000)"
         />
       </form>
@@ -139,8 +166,8 @@ function tweenCoins() {
       <div v-if="toast" class="achievement" role="status">
         <span aria-hidden="true">🏆</span>
         <div>
-          <strong>Achievement unlocked: Curious mind</strong>
-          <small>No real games were harmed in the making of this console.</small>
+          <strong>{{ copy.toastTitle }}</strong>
+          <small>{{ copy.toastNote }}</small>
         </div>
       </div>
     </Transition>

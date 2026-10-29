@@ -1,4 +1,5 @@
 // Single source of truth for personal info shown across the site.
+import type { L } from '../i18n';
 
 // First day of my professional career; years of experience are derived from it at build time.
 const careerStart = new Date('2019-07-01');
@@ -12,9 +13,10 @@ export const profile = {
   shortName: 'Francisco Oliveira',
   role: 'Front-End Developer',
   location: 'Figueira da Foz, Portugal',
-  headline: `Front-End Developer with ${yearsOfExperience}+ years building scalable web applications with Vue.js, Angular, TypeScript and Adobe Experience Manager.`,
-  summary:
-    'I design and develop enterprise-grade web applications, with a focus on reusable component architectures, close collaboration with UI/UX designers, and clean, maintainable codebases. I have worked across fleet management, telecom e-commerce and CRM platforms, from project inception to large-scale, customer-facing products.',
+  headline: {
+    en: `Front-End Developer with ${yearsOfExperience}+ years building scalable web applications with Vue.js, Angular, TypeScript and Adobe Experience Manager.`,
+    pt: `Front-End Developer com mais de ${yearsOfExperience} anos de experiência a desenvolver aplicações web escaláveis com Vue.js, Angular, TypeScript e Adobe Experience Manager.`,
+  } satisfies L,
   email: 'franciscopinho96@gmail.com',
   // Set to true once public/cv.pdf exists (without phone number) to show the download button.
   hasCv: false,
@@ -34,9 +36,9 @@ export type Skill = {
   filter?: boolean;
 };
 
-export const skills: { group: string; items: Skill[] }[] = [
+export const skills: { group: L; items: Skill[] }[] = [
   {
-    group: 'Frontend',
+    group: { en: 'Frontend', pt: 'Frontend' },
     items: [
       { name: 'Vue.js', match: ['Vue.js', 'Vue.js 3'] },
       { name: 'Angular' },
@@ -46,10 +48,10 @@ export const skills: { group: string; items: Skill[] }[] = [
       { name: 'CSS / SCSS', match: ['CSS', 'SCSS'] },
     ],
   },
-  { group: 'CMS & Platforms', items: [{ name: 'AEM', match: ['AEM'] }] },
-  { group: 'Backend', items: [{ name: 'Java', filter: false }, { name: 'Node.js' }, { name: 'REST APIs' }] },
-  { group: 'Databases', items: [{ name: 'PostgreSQL' }, { name: 'MySQL' }, { name: 'MongoDB' }] },
-  { group: 'Tools', items: [{ name: 'Git' }, { name: 'Postman' }, { name: 'Jenkins' }, { name: 'Jira' }] },
+  { group: { en: 'CMS & Platforms', pt: 'CMS e plataformas' }, items: [{ name: 'AEM', match: ['AEM'] }] },
+  { group: { en: 'Backend', pt: 'Backend' }, items: [{ name: 'Java', filter: false }, { name: 'Node.js' }, { name: 'REST APIs' }] },
+  { group: { en: 'Databases', pt: 'Bases de dados' }, items: [{ name: 'PostgreSQL' }, { name: 'MySQL' }, { name: 'MongoDB' }] },
+  { group: { en: 'Tools', pt: 'Ferramentas' }, items: [{ name: 'Git' }, { name: 'Postman' }, { name: 'Jenkins' }, { name: 'Jira' }] },
 ];
 
 export const certifications = [
@@ -57,17 +59,24 @@ export const certifications = [
 ];
 
 export const education = [
-  { degree: "Bachelor's Degree in Computer Science", school: 'University of Aveiro', period: '2014 — 2019', location: 'Aveiro, Portugal' },
+  {
+    degree: { en: "Bachelor's Degree in Computer Science", pt: 'Licenciatura em Engenharia Informática' } satisfies L,
+    school: { en: 'University of Aveiro', pt: 'Universidade de Aveiro' } satisfies L,
+    period: '2014 — 2019',
+  },
 ];
 
-export const languages = [
-  { name: 'Portuguese', level: 'Native' },
-  { name: 'English', level: 'Proficient (C1)' },
-  { name: 'Spanish', level: 'Independent (B2)' },
+export const languages: { name: L; level: L }[] = [
+  { name: { en: 'Portuguese', pt: 'Português' }, level: { en: 'Native', pt: 'Nativo' } },
+  { name: { en: 'English', pt: 'Inglês' }, level: { en: 'Proficient (C1)', pt: 'Proficiente (C1)' } },
+  { name: { en: 'Spanish', pt: 'Espanhol' }, level: { en: 'Independent (B2)', pt: 'Independente (B2)' } },
 ];
 
-export const highlights = [
-  { value: `${yearsOfExperience}+`, label: 'years in enterprise front-end' },
-  { value: '3', label: 'companies: Frotcom, Celfocus (for Vodafone), Altice Labs' },
-  { value: 'ACE', label: 'Adobe Certified Expert, AEM Sites' },
+export const highlights: { value: string; label: L }[] = [
+  { value: `${yearsOfExperience}+`, label: { en: 'years in enterprise front-end', pt: 'anos em front-end empresarial' } },
+  {
+    value: '3',
+    label: { en: 'companies: Frotcom, Celfocus (for Vodafone), Altice Labs', pt: 'empresas: Frotcom, Celfocus (para a Vodafone), Altice Labs' },
+  },
+  { value: 'ACE', label: { en: 'Adobe Certified Expert, AEM Sites', pt: 'Adobe Certified Expert, AEM Sites' } },
 ];

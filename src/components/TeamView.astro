@@ -1,7 +1,8 @@
 ---
-import type { CollectionEntry } from 'astro:content';
+import type { Job } from '../lib/content';
+import { langOf, t } from '../i18n';
 
-type Team = CollectionEntry<'experience'>['data']['teams'][number];
+type Team = Job['data']['teams'][number];
 type Role = Team['members'][number]['role'];
 
 interface Props {
@@ -9,22 +10,26 @@ interface Props {
 }
 
 const { teams } = Astro.props;
+const ui = t(langOf(Astro.url)).team;
 
-const roles: Record<Role, { one: string; many: string; key: string }> = {
-  frontend: { one: 'front-end dev', many: 'front-end devs', key: 'fe' },
-  backend: { one: 'back-end dev', many: 'back-end devs', key: 'be' },
-  qa: { one: 'QA', many: 'QAs', key: 'qa' },
-  po: { one: 'product owner', many: 'product owners', key: 'pm' },
-  sm: { one: 'scrum master', many: 'scrum masters', key: 'pm' },
-  'po-sm': { one: 'product owner / scrum master', many: 'product owners / scrum masters', key: 'pm' },
-};
+const keys: Record<Role, string> = { frontend: 'fe', backend: 'be', qa: 'qa', po: 'pm', sm: 'pm', 'po-sm': 'pm' };
+const roles = Object.fromEntries(
+  Object.entries(keys).map(([role, key]) => {
+    const [one, many] = ui.roles[role as Role];
+    return [role, { one, many, key }];
+  }),
+) as Record<Role, { one: string; many: string; key: string }>;
+const lang = langOf(Astro.url);
+const note = (n?: string) => (n ? (ui.notes[n] ?? n) : undefined);
+// "junior front-end dev" in English, "dev front-end júnior" in Portuguese.
+const describe = (role: string, n?: string) => (!n ? role : lang === 'pt' ? `${role} ${note(n)}` : `${note(n)} ${role}`);
 
 const summarize = (team: Team) => {
   const size = team.members.reduce((n, m) => n + m.count, 0);
   const parts = team.members.map((m) => {
     const r = roles[m.role];
-    if (m.me) return `me (${r.one.replace(' dev', '')}${m.note ? `, ${m.note}` : ''})`;
-    return `${m.count} ${m.note ? `${m.note} ` : ''}${m.count === 1 ? r.one : r.many}`;
+    if (m.me) return `${ui.me} (${ui.meRole[m.role]}${m.note ? `, ${note(m.note)}` : ''})`;
+    return `${m.count} ${describe(m.count === 1 ? r.one : r.many, m.note)}`;
   });
   return { size, text: parts.join(', ') };
 };
@@ -37,30 +42,25 @@ const dots = (team: Team) =>
       Array.from({ length: m.count }, () => ({
         key: roles[m.role].key,
         me: m.me,
-        label: m.me ? 'Me' : `${m.note ? `${m.note} ` : ''}${roles[m.role].one}`,
+        label: m.me ? ui.meDot : describe(roles[m.role].one, m.note),
       })),
     );
 
-const legend = [
-  { key: 'fe', label: 'Front-end' },
-  { key: 'be', label: 'Back-end' },
-  { key: 'qa', label: 'QA' },
-  { key: 'pm', label: 'Product / Scrum' },
-];
+const legend = Object.entries(ui.legend).map(([key, label]) => ({ key, label }));
 ---
 
 {
   teams.length > 0 && (
     <div class="teams">
-      <p class="title">{teams.length > 1 ? `${teams.length} teams` : 'Team'}</p>
+      <p class="title">{teams.length > 1 ? ui.teams(teams.length) : ui.team}</p>
       {teams.map((team) => {
         const s = summarize(team);
         return (
           <div class:list={['team', { lead: team.lead }]}>
             <div class="head">
               {team.name && <span class="name">{team.name}</span>}
-              {team.lead && <span class="lead-badge">Led by me</span>}
-              <span class="size">{s.size} people</span>
+              {team.lead && <span class="lead-badge">{ui.ledByMe}</span>}
+              <span class="size">{ui.people(s.size)}</span>
             </div>
             <div class="dots" aria-hidden="true">
               {dots(team).map((d) => (

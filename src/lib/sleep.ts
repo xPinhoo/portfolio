@@ -16,7 +16,10 @@ export interface SleepEntry {
   quality: number; // 0 (very poor) – 4 (very good)
 }
 
-export const qualityLabels = ['Very poor', 'Poor', 'Fair', 'Good', 'Very good'];
+export const qualityLabels = {
+  en: ['Very poor', 'Poor', 'Fair', 'Good', 'Very good'],
+  pt: ['Muito Mau', 'Mau', 'Razoável', 'Bom', 'Muito Bom'], // as in the app
+};
 
 /** Minutes from `from` to `to`, wrapping past midnight when the hour goes backwards (same rule as the app). */
 function span(from: Time, to: Time) {

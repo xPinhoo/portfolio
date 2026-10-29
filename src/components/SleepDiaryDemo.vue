@@ -12,30 +12,146 @@ import {
 
 // Interactive copy of the app's 10-step sleep diary. Nothing is stored.
 
+const props = withDefaults(defineProps<{ lang?: 'en' | 'pt' }>(), { lang: 'en' });
+
 type Kind = 'time' | 'duration' | 'number' | 'boolean' | 'scale';
 type Step = {
   key: keyof SleepEntry;
   kind: Kind;
-  question: string;
   after?: keyof SleepEntry; // time must be after this answer
 };
 
 const steps: Step[] = [
-  { key: 'bed', kind: 'time', question: 'What time did you go to bed?' },
-  { key: 'tryToSleep', kind: 'time', question: 'What time did you start trying to fall asleep?', after: 'bed' },
-  { key: 'latencyMin', kind: 'duration', question: 'How long did it take you to fall asleep?' },
-  {
-    key: 'awakenings',
-    kind: 'number',
-    question: 'How many times did you wake up during the night (not counting your final awakening)?',
-  },
-  { key: 'awakeMin', kind: 'duration', question: 'In total, how long did those awakenings last?' },
-  { key: 'finalWake', kind: 'time', question: 'What time was your final awakening?', after: 'tryToSleep' },
-  { key: 'outOfBed', kind: 'time', question: 'What time did you get out of bed to start the day?', after: 'finalWake' },
-  { key: 'naps', kind: 'number', question: 'How many naps did you take?' },
-  { key: 'medication', kind: 'boolean', question: 'Did you take any non-prescribed medication to sleep?' },
-  { key: 'quality', kind: 'scale', question: 'How would you rate the quality of your sleep?' },
+  { key: 'bed', kind: 'time' },
+  { key: 'tryToSleep', kind: 'time', after: 'bed' },
+  { key: 'latencyMin', kind: 'duration' },
+  { key: 'awakenings', kind: 'number' },
+  { key: 'awakeMin', kind: 'duration' },
+  { key: 'finalWake', kind: 'time', after: 'tryToSleep' },
+  { key: 'outOfBed', kind: 'time', after: 'finalWake' },
+  { key: 'naps', kind: 'number' },
+  { key: 'medication', kind: 'boolean' },
+  { key: 'quality', kind: 'scale' },
 ];
+
+// The Portuguese questions are the app's own wording.
+const copy = {
+  en: {
+    questions: {
+      bed: 'What time did you go to bed?',
+      tryToSleep: 'What time did you start trying to fall asleep?',
+      latencyMin: 'How long did it take you to fall asleep?',
+      awakenings: 'How many times did you wake up during the night (not counting your final awakening)?',
+      awakeMin: 'In total, how long did those awakenings last?',
+      finalWake: 'What time was your final awakening?',
+      outOfBed: 'What time did you get out of bed to start the day?',
+      naps: 'How many naps did you take?',
+      medication: 'Did you take any non-prescribed medication to sleep?',
+      quality: 'How would you rate the quality of your sleep?',
+    },
+    title: 'Sleep diary',
+    intro: "Log last night's sleep and get the same report patients see in the app. It takes about a minute.",
+    start: 'Start',
+    example: 'See an example night',
+    privacy: 'Nothing you enter is saved or sent anywhere.',
+    previous: 'Previous step',
+    yourReport: 'Your report',
+    stepOf: (n: number, total: number) => `Step ${n} of ${total}`,
+    hour: 'Hour',
+    minutes: 'Minutes',
+    decrease: 'Decrease',
+    increase: 'Increase',
+    yes: 'Yes',
+    no: 'No',
+    seeReport: 'See my report',
+    next: 'Next',
+    invalidTime: (t: string) => `Invalid time: please pick a time after ${t}.`,
+    reportTitle: 'Your sleep report',
+    efficiency: 'efficiency',
+    timeInBed: 'Time in bed',
+    timeAsleep: 'Time asleep',
+    rating: {
+      good: 'Good efficiency. A common target is 85% or more.',
+      fair: 'Room to improve. A common target is 85% or more.',
+      low: 'Low efficiency: a lot of time in bed was spent awake.',
+    },
+    timeline: 'Timeline',
+    wentToBed: 'Went to bed',
+    tried: 'Tried to fall asleep',
+    toFallAsleep: 'to fall asleep',
+    finalAwakening: 'Final awakening',
+    untilUp: 'until getting up',
+    gotUp: 'Got up',
+    night: 'During the night',
+    timesWoke: 'times woke up',
+    awakeTotal: 'awake in total',
+    naps: 'naps',
+    extra: 'Extra',
+    medication: 'Non-prescribed medication',
+    quality: 'Sleep quality',
+    of4: (n: number) => `${n} of 4`,
+    again: 'Log another night',
+    openApp: 'Open the real app ↗',
+  },
+  pt: {
+    questions: {
+      bed: 'A que horas foi para a cama?',
+      tryToSleep: 'A que horas tentou começar a dormir?',
+      latencyMin: 'Quanto tempo levou a adormecer?',
+      awakenings: 'Quantas vezes acordou durante a noite (sem contar com o último acordar)?',
+      awakeMin: 'No total, quanto tempo demoraram esses acordares?',
+      finalWake: 'Qual foi a hora do seu acordar final?',
+      outOfBed: 'A que horas se levantou para começar o dia?',
+      naps: 'Quantas vezes realizou uma sesta?',
+      medication: 'Tomou medicação não prescrita para dormir?',
+      quality: 'Como avalia a qualidade do seu sono?',
+    },
+    title: 'Diário do sono',
+    intro: 'Registe a noite passada e receba o mesmo relatório que os pacientes veem na aplicação. Demora cerca de um minuto.',
+    start: 'Começar',
+    example: 'Ver uma noite de exemplo',
+    privacy: 'Nada do que introduzir é guardado ou enviado.',
+    previous: 'Passo anterior',
+    yourReport: 'O seu relatório',
+    stepOf: (n: number, total: number) => `Passo ${n} de ${total}`,
+    hour: 'Hora',
+    minutes: 'Minutos',
+    decrease: 'Diminuir',
+    increase: 'Aumentar',
+    yes: 'Sim',
+    no: 'Não',
+    seeReport: 'Ver o meu relatório',
+    next: 'Seguinte',
+    invalidTime: (t: string) => `Hora inválida: selecione uma hora posterior às ${t}.`,
+    reportTitle: 'O seu relatório de sono',
+    efficiency: 'eficiência',
+    timeInBed: 'Tempo na cama',
+    timeAsleep: 'Tempo a dormir',
+    rating: {
+      good: 'Boa eficiência. Um objetivo comum é 85% ou mais.',
+      fair: 'Há margem para melhorar. Um objetivo comum é 85% ou mais.',
+      low: 'Eficiência baixa: grande parte do tempo na cama foi passado acordado.',
+    },
+    timeline: 'Cronologia',
+    wentToBed: 'Foi para a cama',
+    tried: 'Tentou adormecer',
+    toFallAsleep: 'para adormecer',
+    finalAwakening: 'Acordar final',
+    untilUp: 'até se levantar',
+    gotUp: 'Levantou-se',
+    night: 'Durante a noite',
+    timesWoke: 'vezes acordou',
+    awakeTotal: 'acordado no total',
+    naps: 'sestas',
+    extra: 'Extra',
+    medication: 'Medicação não prescrita',
+    quality: 'Qualidade do sono',
+    of4: (n: number) => `${n} de 4`,
+    again: 'Registar outra noite',
+    openApp: 'Abrir a aplicação ↗',
+  },
+}[props.lang];
+const labels = qualityLabels[props.lang];
 
 const defaults = (): SleepEntry => ({
   bed: { hour: 23, min: 0 },
@@ -102,7 +218,7 @@ function next() {
   const s = current.value;
   if (s.kind === 'time' && s.after) {
     if (!isTimeAfterOrEqual(entry[s.key] as Time, entry[s.after] as Time)) {
-      error.value = `Invalid time: please pick a time after ${formatClock(entry[s.after] as Time)}.`;
+      error.value = copy.invalidTime(formatClock(entry[s.after] as Time));
       return;
     }
   }
@@ -128,14 +244,7 @@ function setNumber(key: 'awakenings' | 'naps', delta: number) {
 const R = 52;
 const circumference = 2 * Math.PI * R;
 const ringOffset = computed(() => circumference * (1 - Math.max(0, Math.min(100, report.value.efficiency)) / 100));
-const ratingText = computed(
-  () =>
-    ({
-      good: 'Good efficiency. A common target is 85% or more.',
-      fair: 'Room to improve. A common target is 85% or more.',
-      low: 'Low efficiency: a lot of time in bed was spent awake.',
-    })[report.value.rating],
-);
+const ratingText = computed(() => copy.rating[report.value.rating]);
 </script>
 
 <template>
@@ -145,23 +254,23 @@ const ratingText = computed(
       <div class="moon" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" /></svg>
       </div>
-      <h3>Sleep diary</h3>
-      <p>Log last night's sleep and get the same report patients see in the app. It takes about a minute.</p>
+      <h3>{{ copy.title }}</h3>
+      <p>{{ copy.intro }}</p>
       <div class="intro-actions">
-        <button type="button" class="primary" @click="start">Start</button>
-        <button type="button" class="ghost" @click="showExample">See an example night</button>
+        <button type="button" class="primary" @click="start">{{ copy.start }}</button>
+        <button type="button" class="ghost" @click="showExample">{{ copy.example }}</button>
       </div>
-      <small>Nothing you enter is saved or sent anywhere.</small>
+      <small>{{ copy.privacy }}</small>
     </div>
 
     <template v-else>
       <!-- Progress -->
       <div class="progress">
         <div class="progress-head">
-          <button type="button" class="back" :class="{ hidden: step === 0 }" aria-label="Previous step" @click="back">
+          <button type="button" class="back" :class="{ hidden: step === 0 }" :aria-label="copy.previous" @click="back">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 18l-6-6 6-6" /></svg>
           </button>
-          <span>{{ isReport ? 'Your report' : `Step ${step + 1} of ${steps.length}` }}</span>
+          <span>{{ isReport ? copy.yourReport : copy.stepOf(step + 1, steps.length) }}</span>
           <span class="spacer"></span>
         </div>
         <div class="track"><div class="fill" :style="{ width: `${progress}%` }"></div></div>
@@ -170,20 +279,20 @@ const ratingText = computed(
       <Transition :name="direction" mode="out-in">
         <!-- Question -->
         <form v-if="!isReport" :key="step" class="question" @submit.prevent="next">
-          <h4 tabindex="-1" data-focus>{{ current.question }}</h4>
+          <h4 tabindex="-1" data-focus>{{ copy.questions[current.key] }}</h4>
 
           <div v-if="current.kind === 'time'" class="time">
-            <select v-model.number="timeValue.hour" aria-label="Hour">
+            <select v-model.number="timeValue.hour" :aria-label="copy.hour">
               <option v-for="h in hours" :key="h" :value="h">{{ pad(h) }}</option>
             </select>
             <span class="colon">:</span>
-            <select v-model.number="timeValue.min" aria-label="Minutes">
+            <select v-model.number="timeValue.min" :aria-label="copy.minutes">
               <option v-for="m in minutes" :key="m" :value="m">{{ pad(m) }}</option>
             </select>
           </div>
 
           <div v-else-if="current.kind === 'duration'" class="time">
-            <select v-model.number="entry[current.key]" aria-label="Minutes">
+            <select v-model.number="entry[current.key]" :aria-label="copy.minutes">
               <option v-for="d in durations" :key="d" :value="d">{{ d }}</option>
             </select>
             <span class="unit">min</span>
@@ -192,14 +301,14 @@ const ratingText = computed(
           <div v-else-if="current.kind === 'number'" class="stepper">
             <button
               type="button"
-              aria-label="Decrease"
+              :aria-label="copy.decrease"
               :disabled="(entry[current.key] as number) === 0"
               @click="setNumber(current.key as 'awakenings' | 'naps', -1)"
             >
               −
             </button>
             <output aria-live="polite">{{ entry[current.key] }}</output>
-            <button type="button" aria-label="Increase" @click="setNumber(current.key as 'awakenings' | 'naps', 1)">+</button>
+            <button type="button" :aria-label="copy.increase" @click="setNumber(current.key as 'awakenings' | 'naps', 1)">+</button>
           </div>
 
           <div v-else-if="current.kind === 'boolean'" class="choices" role="radiogroup">
@@ -212,13 +321,13 @@ const ratingText = computed(
               :class="{ on: entry.medication === opt }"
               @click="entry.medication = opt"
             >
-              {{ opt ? 'Yes' : 'No' }}
+              {{ opt ? copy.yes : copy.no }}
             </button>
           </div>
 
           <div v-else-if="current.kind === 'scale'" class="scale" role="radiogroup">
             <button
-              v-for="(label, i) in qualityLabels"
+              v-for="(label, i) in labels"
               :key="i"
               type="button"
               role="radio"
@@ -234,13 +343,13 @@ const ratingText = computed(
           <p v-if="error" class="error" role="alert">{{ error }}</p>
 
           <button type="submit" class="primary next">
-            {{ step === steps.length - 1 ? 'See my report' : 'Next' }}
+            {{ step === steps.length - 1 ? copy.seeReport : copy.next }}
           </button>
         </form>
 
         <!-- Report -->
         <div v-else key="report" class="report">
-          <h4 tabindex="-1" data-focus class="visually-hidden">Your sleep report</h4>
+          <h4 tabindex="-1" data-focus class="visually-hidden">{{ copy.reportTitle }}</h4>
           <div class="summary">
             <div class="ring" :class="report.rating">
               <svg viewBox="0 0 120 120" aria-hidden="true">
@@ -256,66 +365,66 @@ const ratingText = computed(
               </svg>
               <div class="ring-label">
                 <strong>{{ report.efficiency }}%</strong>
-                <span>efficiency</span>
+                <span>{{ copy.efficiency }}</span>
               </div>
             </div>
             <div class="stats">
               <div class="stat">
-                <span class="label">Time in bed</span>
+                <span class="label">{{ copy.timeInBed }}</span>
                 <strong>{{ formatHM(report.timeInBed) }}</strong>
               </div>
               <div class="stat">
-                <span class="label">Time asleep</span>
+                <span class="label">{{ copy.timeAsleep }}</span>
                 <strong>{{ formatHM(report.sleepTime) }}</strong>
               </div>
               <p class="rating" :class="report.rating">{{ ratingText }}</p>
             </div>
           </div>
 
-          <h5>Timeline</h5>
+          <h5>{{ copy.timeline }}</h5>
           <ol class="timeline">
             <li>
-              <span class="dot start"></span><b>{{ formatClock(entry.bed) }}</b> Went to bed
+              <span class="dot start"></span><b>{{ formatClock(entry.bed) }}</b> {{ copy.wentToBed }}
             </li>
             <li class="gap">{{ formatHM(report.bedToTry) }}</li>
-            <li><span class="dot"></span><b>{{ formatClock(entry.tryToSleep) }}</b> Tried to fall asleep</li>
-            <li class="gap">{{ formatHM(entry.latencyMin) }} to fall asleep</li>
-            <li><span class="dot sleep"></span><b>{{ formatClock(entry.finalWake) }}</b> Final awakening</li>
-            <li class="gap">{{ formatHM(report.wakeToUp) }} until getting up</li>
-            <li><span class="dot end"></span><b>{{ formatClock(entry.outOfBed) }}</b> Got up</li>
+            <li><span class="dot"></span><b>{{ formatClock(entry.tryToSleep) }}</b> {{ copy.tried }}</li>
+            <li class="gap">{{ formatHM(entry.latencyMin) }} {{ copy.toFallAsleep }}</li>
+            <li><span class="dot sleep"></span><b>{{ formatClock(entry.finalWake) }}</b> {{ copy.finalAwakening }}</li>
+            <li class="gap">{{ formatHM(report.wakeToUp) }} {{ copy.untilUp }}</li>
+            <li><span class="dot end"></span><b>{{ formatClock(entry.outOfBed) }}</b> {{ copy.gotUp }}</li>
           </ol>
 
-          <h5>During the night</h5>
+          <h5>{{ copy.night }}</h5>
           <div class="night">
             <div>
-              <strong>{{ entry.awakenings }}</strong><span>times woke up</span>
+              <strong>{{ entry.awakenings }}</strong><span>{{ copy.timesWoke }}</span>
             </div>
             <div>
-              <strong>{{ entry.awakeMin }} min</strong><span>awake in total</span>
+              <strong>{{ entry.awakeMin }} min</strong><span>{{ copy.awakeTotal }}</span>
             </div>
             <div>
-              <strong>{{ entry.naps }}</strong><span>naps</span>
+              <strong>{{ entry.naps }}</strong><span>{{ copy.naps }}</span>
             </div>
           </div>
 
-          <h5>Extra</h5>
+          <h5>{{ copy.extra }}</h5>
           <div class="extra">
             <div>
-              <span>Non-prescribed medication</span>
-              <span class="pill" :class="{ yes: entry.medication }">{{ entry.medication ? 'Yes' : 'No' }}</span>
+              <span>{{ copy.medication }}</span>
+              <span class="pill" :class="{ yes: entry.medication }">{{ entry.medication ? copy.yes : copy.no }}</span>
             </div>
             <div>
-              <span>Sleep quality</span>
-              <span class="dots" :aria-label="`${entry.quality} of 4`">
+              <span>{{ copy.quality }}</span>
+              <span class="dots" :aria-label="copy.of4(entry.quality)">
                 <i v-for="i in 5" :key="i" :class="{ on: entry.quality >= i - 1 }"></i>
-                <em>{{ qualityLabels[entry.quality] }}</em>
+                <em>{{ labels[entry.quality] }}</em>
               </span>
             </div>
           </div>
 
           <div class="report-actions">
-            <button type="button" class="primary" @click="start">Log another night</button>
-            <a class="ghost" href="https://saber-o-que-importa.web.app" target="_blank" rel="noopener">Open the real app ↗</a>
+            <button type="button" class="primary" @click="start">{{ copy.again }}</button>
+            <a class="ghost" href="https://saber-o-que-importa.web.app" target="_blank" rel="noopener">{{ copy.openApp }}</a>
           </div>
         </div>
       </Transition>

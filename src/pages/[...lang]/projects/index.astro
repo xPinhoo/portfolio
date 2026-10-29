@@ -1,0 +1,127 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ProjectCard from '../../../components/ProjectCard.astro';
+import { getProjects } from '../../../lib/content';
+import { langOf, langPaths } from '../../../i18n';
+
+export const getStaticPaths = langPaths;
+
+const lang = langOf(Astro.url);
+const projects = await getProjects(lang);
+const copy = {
+  en: {
+    title: 'Projects',
+    description: 'Personal and side projects built outside of work.',
+    eyebrow: 'Outside of work',
+    intro: "The things I build when nobody's asking me to: for people who needed a hand, and for my own curiosity.",
+    groups: 'Project groups',
+    completed: ['Completed', 'Shipped and in the hands of real users.'],
+    ongoing: ['Currently building', 'Work in progress: what I tinker with in the evenings and on weekends.'],
+  },
+  pt: {
+    title: 'Projetos',
+    description: 'Projetos pessoais desenvolvidos fora do trabalho.',
+    eyebrow: 'Fora do trabalho',
+    intro: 'O que construo quando ninguém me pede: para pessoas que precisavam de uma ajuda, e por pura curiosidade.',
+    groups: 'Grupos de projetos',
+    completed: ['Concluídos', 'Lançados e nas mãos de utilizadores reais.'],
+    ongoing: ['Em desenvolvimento', 'Trabalho em curso: aquilo em que mexo à noite e aos fins de semana.'],
+  },
+}[lang];
+const groups = (['completed', 'ongoing'] as const)
+  .map((id) => ({
+    id,
+    title: copy[id][0],
+    intro: copy[id][1],
+    items: projects.filter((p) => p.data.status === id),
+  }))
+  .filter((g) => g.items.length > 0);
+---
+
+<BaseLayout title={copy.title} description={copy.description}>
+  <section class="container section">
+    <p class="eyebrow">{copy.eyebrow}</p>
+    <h1>{copy.title}</h1>
+    <p class="muted intro">{copy.intro}</p>
+
+    <nav class="jump" aria-label={copy.groups}>
+      {
+        groups.map((g) => (
+          <a href={`#${g.id}`}>
+            {g.title}
+            <span class="count">{g.items.length}</span>
+          </a>
+        ))
+      }
+    </nav>
+
+    {
+      groups.map((g) => (
+        <section class="group" id={g.id}>
+          <header class="group-head">
+            <h2>{g.title}</h2>
+            <p class="muted">{g.intro}</p>
+          </header>
+          <div class="grid">
+            {g.items.map((p) => (
+              <ProjectCard project={p} />
+            ))}
+          </div>
+        </section>
+      ))
+    }
+  </section>
+</BaseLayout>
+
+<style>
+  .intro {
+    max-width: 620px;
+    font-size: 1.1rem;
+  }
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: 1.5rem 0 1rem;
+  }
+  .jump a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    text-decoration: none;
+    font-size: 0.9rem;
+  }
+  .jump a:hover {
+    border-color: var(--accent);
+  }
+  .count {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 999px;
+    padding: 0 0.45rem;
+  }
+  .group {
+    padding-top: 2.5rem;
+    scroll-margin-top: 70px;
+  }
+  .group-head {
+    margin-bottom: 1.25rem;
+  }
+  .group-head h2 {
+    margin-bottom: 0.25rem;
+  }
+  .group-head p {
+    margin: 0;
+  }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 1.25rem;
+  }
+</style>

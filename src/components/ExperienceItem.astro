@@ -1,27 +1,30 @@
 ---
-import { render, type CollectionEntry } from 'astro:content';
-import { formatDuration, formatPeriod, monthsBetween } from '../lib/content';
+import { render } from 'astro:content';
+import { formatDuration, formatPeriod, monthsBetween, type Job } from '../lib/content';
+import { langOf, t } from '../i18n';
 import TeamView from './TeamView.astro';
 import RecommendationCard from './RecommendationCard.astro';
 
 interface Props {
-  job: CollectionEntry<'experience'>;
+  job: Job;
   compact?: boolean;
 }
 
 const { job, compact = false } = Astro.props;
 const { company, tagline, client, role, location, start, end, technologies, highlights, teams, recommendations } = job.data;
 const current = !end;
-const { Content } = await render(job);
+const lang = langOf(Astro.url);
+const ui = t(lang);
+const { Content } = await render(job.source);
 ---
 
 <article class="item reveal" id={`job-${job.id}`} data-job data-tech={technologies.join('|')}>
   <div class:list={['dot', { current }]} aria-hidden="true"></div>
   <p class="period">
-    <span>{formatPeriod(start, end)}</span><span class="sep" aria-hidden="true">·</span><span>{formatDuration(monthsBetween(start, end))}</span>
-    {current && <span class="badge">Current</span>}
+    <span>{formatPeriod(start, end, lang)}</span><span class="sep" aria-hidden="true">·</span><span>{formatDuration(monthsBetween(start, end), lang)}</span>
+    {current && <span class="badge">{ui.current}</span>}
   </p>
-  <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}{client && <span class="muted"> — client: {client}</span>}</h3>
+  <h3>{role} · {company}{tagline && <span class="muted"> — {tagline}</span>}{client && <span class="muted"> — {ui.client}: {client}</span>}</h3>
   <p class="muted loc">{location}</p>
   {
     highlights.length > 0 && (
