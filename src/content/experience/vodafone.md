@@ -1,7 +1,7 @@
 ---
 company: Celfocus
 client: Vodafone
-role: Frontend Developer
+role: Fullstack Developer
 location: Lisbon, Portugal
 start: 2021-06-01
 end: 2025-02-01
